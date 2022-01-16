@@ -51,7 +51,7 @@ The interpreter is exported in two forms:
 @Defproc[(value (sexpr #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{
 Called from @[Rckt] procedure it receives the evaluated argument @nbr[sexpr].
 It evaluates the received value in its own top environment.
-Usually one will call the interprter with quoted argument, for example.
+Usually one will call the interpreter with quoted argument, for example.
 
 @inset{
 @Interaction[(value '(cons 'a '()))]}}
