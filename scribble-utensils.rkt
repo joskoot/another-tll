@@ -10,12 +10,10 @@
   scribble/eval
   scribble/racket
   (except-in racket natural?)
-  (for-label "interpreter.rkt"
-              (except-in racket set natural?) racket/block racket/function)
-  (for-template "interpreter.rkt" (except-in racket set natural?))
-  (for-syntax (except-in racket set natural?) racket/block))
+  (for-label "interpreter.rkt")
+  (for-template "interpreter.rkt"))
 
-@(define-for-syntax local? #f)
+@(define-for-syntax local? #t)
 
 @(provide (all-defined-out))
 
@@ -23,8 +21,7 @@
   (interaction #:eval
    (make-base-eval
     #:lang '(begin
-             (require racket "interpreter.rkt" racket/block
-                      (for-syntax racket racket/block))
+             (require racket "interpreter.rkt")
              (print-as-expression #f))) x ...))
 
 @(define-syntax-rule (Interaction* x ...)
@@ -33,8 +30,7 @@
 @(define (make-evaller)
   (make-base-eval
    #:lang '(begin
-            (require racket "interpreter.rkt" racket/block
-                     (for-syntax racket racket/block))
+            (require racket "interpreter.rkt" )
             (print-as-expression #f))))
 
 @(define evaller (make-evaller))
