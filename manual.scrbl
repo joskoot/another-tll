@@ -32,355 +32,307 @@ by Danial P. Friedman and Matthias Felleisen
  #:sep (hspace 5)
  #:row-properties '((top top-border bottom-border))]}
 
-Well, I do bother and therefore I'm giving it a shot in the form of two modules:
+Well, I do bother and therefore I'm giving it a shot in the form of two modules in file
+@nbhll["interpreter.rkt"]{interpreter.rkt}. 
+Submodule @tt{restrictions} provides restricted versions of the following macros and functions:
+@nbpr{lambda}, @nbpr{let*}, @nbpr{quote}, @nbpr{cond}, @nbpr{atom?}, @nbpr{car}, @nbpr{cdr},
+@nbpr{cons}, @nbpr{eq?}, @nbpr{null?},  @nbpr{show} and @nbpr{wrong}.
+The @nbr[source-code] in submodule @tt{interpreter}
+is restricted to these macros and functions.
+Because the interpreter is intended to be meta-recursive,
+it implements these macros and functions and adds a few more functions.
+The interpreter is exported in two forms:
 
-@inset{@nbhll["interpreter.rkt"]{interpreter.rkt}@(lb)
-@nbhll["restrictions.rkt"]{restrictions.rkt}}
+@inset{@Tabular[
+((@(nbr value) ":" @(nbr (-> #,(nbpr "sexpr?") #,(nbpr "sexpr?"))) "the interpreter proper.")
+ (@(nbr source-code) ":" @(nbpr "sexpr?") (list "the source code of function " @(nbr value))))
+ #:sep (hspace 1)]}
 
-Submodule @nbhll["restrictions.rkt"]{@nbr[(submod "restrictions.rkt" restrictions)]}
-defines a restricted language for the
-@nbr[source-code] in module @nbhll["interpreter.rkt"]{interpreter.rkt}.
-It provides all primitives and macros for the @nbr[source-code].
-@nbhll["interpreter.rkt"]{interpreter.rkt} provides procedure @nbr[value] and
-its @nbr[source-code].
+@Defproc[(value (sexpr #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{
+Called from @[Rckt] procedure it receives the evaluated argument @nbr[sexpr].@(lb)
+It evaluates the received value in its own top environment.}
 
-@Defproc[(value (sexpr sexpr?)) any/c]{
-Called from @[Rckt] procedure @nbr[value] receives the evaluated argument @nbr[sexpr].
-It evaluates the received value,
-which must be a @elemref["sexpr?"]{sexpr} according to its own rules.}
+@defthing[source-code #,(nbpr "sexpr?")]{
+Source code of procedure @nbr[value].}
 
-@defthing[source-code sexpr?]{
-Source code of procedure @nbr[value] written according to the rules described in section
- @seclink["restrictions"]{Restrictions}.}
+Predicate @nbpr{sexpr?} is not provided. It complies to the following description:
 
-@elemtag{sexpr?}
-@Defproc[(sexpr? (obj any/c)) #,(nbpr "boolean?")]{
-Same as @nbr[(or (atom? obj) (and (list? obj) (andmap sexpr? obj)))].}
+@inset{@elemtag{sexpr?}
+@Interaction*[
+(define (sexpr? obj)
+ (or
+  (atom? obj)
+  (and (list? obj) (andmap sexpr? obj))))]
 
 @elemtag{atom?}
-@defproc[#:kind "predicate" (atom? (obj any/c)) #,(nbpr "boolean?")]{
-Same as @nbr[(or (null? obj) (symbol? obj) (boolean? obj))].
-Notice that numbers are not accepted.
-Within interpreter @nbr[value] they are represented by @nbr[(listof null?)].
+@Interaction*[
+(define (atom? obj)
+ (or
+  (symbol? obj)
+  (boolean? obj)
+  (null? obj)))]}
 
-@note{Behind the screen,
-predicate @elemref["atom?"]{atom?} raises an error if its argument is not an atom nor a proper list.}}
+The above definition of @nbpr{sexpr?} can be very slow for big and deeply nested expressions.
+For example,
+@nbr[(value source-code)] yields an expression with flattened length of almost 4×10@↑{18} atoms.
+A better definition can be found in section @seclink["meta-recursivity"]{Meta-recursivity}.
 
-@section[#:tag "restrictions"]{Restrictions on the source-code}
+A @elemref["sexpr?"]{sexpr} must not contain numbers.
+These are implemented in the @nbr[source-code] as lists of @nbr[null], id est,
+with type @nbr[(listof null?)]. See section @secref{Natural-numbers}.
 
-The restrictions imposed on the @nbr[source-code] include the five laws at the inside of the back
-cover of @nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The Little LISPer}
-and allow a restricted set of primitives.
-The following restrictions apply to the @nbr[source-code].
-@itemlist[
-@item{The macros are @nbpr{lambda}, @nbpr{quote}, @nbpr{cond} and @nbpr{let*}.@(lb)
-They are restricted as described below.}
-@item{The functions are @nbpr{atom?}, @nbpr{symbol?}, @nbpr{eq?}, @nbpr{null?}, @nbpr{cons},
-@nbpr{car}, @nbpr{cdr} and @nbpr{show}.
-They are described below too,
-@nbpr{atom?} excluded, which already has been described above.}]
+@section[#:tag "restrictions"]{Restrictions}
+
+The @nbr[source-code] is written in a very small subset of @(Rckt). The macros and functions are
+@nbpr{lambda}, @nbpr{let*}, @nbpr{quote}, @nbpr{cond}, @nbpr{atom?}, @nbpr{car}, @nbpr{cdr},
+@nbpr{cons}, @nbpr{eq?} and @nbpr{null?}. They are restricted as described below.
+Two procedures are added: @nbpr{show} and @nbpr{wrong}.
+The restrictions include those of the inside of the back cover of
+@nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The Little LISPer}.
+
 
 @elemtag{lambda}
-@defform-remove-empty-lines[@defmacro[(lambda (formal-arg ...+) body)
-#:grammar ((formal-arg symbol) (body sexpr))]{
-At least one @nbr[formal-arg] is required and
-the @nbr[body] is restricted to one @nbr[sexpr] only.
-@nb{No rest, no optional} nor keyword-arguments.}]
-
-@elemtag{quote}
-@defmacro[(quote datum) #:grammar ((datum sexpr))]{As in @(Rckt),
-but the @nbr[datum] must be a @elemref["sexpr?"]{sexpr}.}
-
-@elemtag{cond}
-@defmacro[(cond (test sexpr) ...+)]{
-At least one @nbr[(test sexpr)] clause is required. Each @nbr[test] must yield a
-@elemref["boolean?"]{boolean}. This is tested at run-time up to and including the first @nbr[test]
-that yields @nbr[#t] (or does not yield a @elemref["boolean?"]{boolean},
-in which case an error is raised.}
+@defform-remove-empty-lines[@defform[(lambda (formal-argument ...+) body)
+#:grammar
+((formal-argument id)
+ (body sexpr))]{
+At least one @nbr[formal-argument] required and the @nbr[body] must consist of one
+@elemref["sexpr?"]{sexpr} only. No optional or keyword arguments.}]
 
 @elemtag{let*}
-@defmacro[(let* ((var sexpr) ...+) body)]{
-The @nbr[body] is restricted to one @nbr[sexpr] only.
-@nbpr{let*}-forms are not allowed in the @nbr[sexpr]s nor in the @nbr[body].
-In fact the @nbr[source-code] has the form @nbr[(let* ((var sexpr) ...+) value)]
-without any nested @nbpr{let*}-form.
-The restriction does not apply to the implemented language.}
+@defform-remove-empty-lines[@defform[(let* ((var expr) ...) body)
+#:grammar
+((var id)
+ (expr sexpr)
+ (body sexpr))]{
+Like in @(Rckt) but restricted to a @nbr[body] of one @elemref["sexpr?"]{sexpr} only.
+The interpreter expands a @nbpr{let*}-form to a nest of @nbpr{lambda}-forms
+and evaluates the expanded form.
+@nbpr{let*} is used to enhance readability for the human eye.
+Because the interpreter is intended to be meta-recursive,
+it implements @nbpr{let*}-forms too.}]
 
-@elemtag{symbol?}
-@defproc[#:kind "predicate" (symbol? (obj any/c)) #,(nbpr "boolean?")]{
-Same as in @(Rckt).}
+@elemtag{quote}
+@defform-remove-empty-lines[@defform[(quote datum)
+#:grammar ((datum sexpr))]{
+Like in @(Rckt), but the @nbr[datum] is restricted to a @elemref["sexpr?"]{sexpr}.}]
 
-@elemtag{eq?}
-@Defproc[(eq? (x atom?) (y atom?)) #,(nbpr "boolean?")]{
-Equivalence relation @nbpr{eq?} is restricted to atoms as required by the five laws of
-@nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The Little LISPer}.}
+@elemtag{cond}
+@defform-remove-empty-lines[
+@defform[(cond ((test expr) ...+))
+#:grammar
+((test sexpr)
+ (expr sexpr))]{
+Like in @(Rckt), but with the restriction that each @nbr[test] must yield a
+@elemref["boolean?"]{boolean} and at least one @nbr[test] must succeed.}]
 
-@elemtag{null?}
-@Defproc[(null? (lst list?)) boolean]{
-Restricted to lists as required by the five laws of
-@nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The Little LISPer}.}
-
-@elemtag{cons}
-@Defproc[(cons (kar any/c) (kdr list?)) list?]{
-Argument @nbr[kdr] must be a list as required by the five laws of
-@nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The Little LISPer}.}
+@defproc[#:kind "predicate" (atom? (obj #,(nbpr "sexpr?"))) boolean?]{
+Returns @nbr[#t] if and only if the @nbr[obj] is a @nbrl[symbol?]{symbol},
+a @nbrl[boolean?]{boolean} or the empty list.
+Returns @nbr[#f] if the @nbr[obj] is a @elemref["sexpr?"]{sexpr} but not an @elemref["atom?"]{atom}.
+Raises an exception if the @nbr[obj] is not a @elemref["sexpr?"]{sexpr}.}
 
 @elemtag{car}
-@Defproc[(car (lst (non-empty-listof any/c))) any/c]{
-Restricted to proper lists as required by the five laws of
-@nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The Little LISPer}.}
+@Defproc[(car (lst list?)) #,(nbpr "sexpr?")]{
+Like in @(Rckt), but restricted to proper lists.}
 
 @elemtag{cdr}
-@Defproc[(cdr (lst (non-empty-listof any/c))) list?]{
-Restricted to proper lists as required by the five laws of
-@nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The Little LISPer}.}
+@Defproc[(cdr (lst list?)) #,(nbpr "sexpr?")]{
+Like in @(Rckt), but restricted to proper lists.}
+
+@elemtag{cons}
+@Defproc[(cons (kar #,(nbpr "sexpr?")) (kdr (listof #,(nbpr "sexpr?")))) (listof #,(nbpr "sexpr?"))]{
+Like in @(Rckt), but @nbr[kdr] must be a proper list, which may be empty.}
+
+@elemtag{eq?}
+@Defproc[(eq? (obj-1 #,(nbpr "atom?")) (obj-2 #,(nbpr "atom?"))) boolean?]{
+Like in @(Rckt), but restricted to @elemref["atom?"]{atoms},
+for which @nbpr{eq?} returns the same as @(Rckt)'s @nbr[equal?].}
+
+@elemtag{null?}
+@defproc[#:kind "predicate" (null? (obj (listof #,(nbpr "sexpr?")))) boolean?]{
+Like in @(Rckt), but restricted to lists.}
 
 @elemtag{show}
-@defproc[(show (obj any/c)) any/c]{
-Returns the @nbr[obj] with the side effect of printing it.
-A @elemref["natural?"]{natural number} is printed in normal notation (decimal positional).}
+@defproc[(show (info #,(nbpr "sexpr?")) (obj #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{
+Prints the @nbr[info] and @nbr[obj] and returns the @nbr[obj].
+This procedure is added in order that the user can include some tracing in her/his program.}
 
-@section{The source-code}
-The @nbr[source-code] of procedure @nbr[value] is in a submodule of the same name in file
-@nbhll["interpreter.rkt"]{interpreter.rkt}.
-The code is restricted to what is provided by
+@elemtag{wrong}
+@defproc[(wrong (why #,(nbpr "sexpr?")) (what #,(nbpr "sexpr?")))
+#,(seclink "exn-model" #:doc '(lib "scribblings/reference/reference.scrbl") "exception")]{
+Same as @nbr[(error (format "~s" why) what)] in @(Rckt),
+but with @elemref["sexpr?"]{sexprs} as arguments.
+Used in the @nbr[source-code] and included for meta-recursivity.
+Hence also available to the user.}
 
-@inset{@nbr[(submod "restrictions.rkt" restrictions)]}
+@section[#:tag "Natural-numbers"]{Natural numbers}
 
-The @nbr[source-code] is restricted to modified variants of
-@nbpr{lambda}, @nbpr{quote}, @nbpr{cond}, @nbpr{let*}, @nbpr{atom?}, @nbpr{symbol?}, @nbpr{eq?},
-@nbpr{null?}, @nbpr{cons}, @nbpr{car} and @nbpr{cdr} and addition of procedure @nbpr{show}.
-These macros and procedures are described in section @seclink["restrictions"]{Restrictions}.
-Function @nbr[value] as provided by @nbhll["interpreter.rkt"]{interpreter.rkt}
-is not a straight forward transformation of function @tt{value} of
-@nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The little LISPer}.
-Functions and macros are represented by procedures of three arguments:
+@elemref["natural?"]{Natural numbers} are represented by lists of @nbr[null]:
 
-@inset{@elemtag{function/macro}
-@defproc[#:kind "function or macro" #:link-target? #f
-(function/macro
- (exprs list?)
- (env (-> symbol? any/c))
- (eval #,(nber "function/macro" "function/macro?")))
-         any/c]{
-The @nbr[exprs] are the unevaluated arguments.
-@nbr[env] is the environment and @nbr[eval] a function for evaluation of the @nbr[exprs].
-A function always uses @nbr[env] and @nbr[eval]
-for the evaluation of the @nbr[exprs] and thereafter uses the values only.
-A macro has more freedom.
-Function @nbr[eval] reveives itself as argument when it is called by
-procedure @nbr[value].
-@nbhll["restrictions.rkt"]{@nbr[(submod "restrictions.rkt" restrictions)]}
-provides primitive functions for the @nbr[source-code].
-Within the latter they are wrapped such as to become @(nber "function/macro" "functions")
-in the required representation.}}
+@inset{@Tabular[
+(("decimal notation" "represented by")
+ (@nbr[0] @nbr[()])
+ (@nbr[1] @nbr[(())])
+ (@nbr[2] @nbr[(()())])
+ (@nbr[3] @nbr[(()()())])
+ ("etc" "etc"))
+#:sep (hspace 3)
+#:column-properties '(center left)
+#:row-properties '((top-border bottom-border) () () () () 'bottom-border)]}
 
-@section{Language accepted by interpreter.}
-
-Function @nbr[value] evaluates its @tt{@italic{expr}} as follows:
-
-@itemize[
-@item{A symbol is looked up in the current environment.
-The top-level environment contains: 
-
-@inset{@nbpr{atom?}, @nbpr{symbol?}, @nbpr{boolean?}, @nbr[zero?], @nbr[add1],
-@nbr[sub1], @nbpr{eq?}, @nbpr{null?}, @nbpr{cons}, @nbr[list], @nbr[length], @nbpr{car}, @nbpr{cdr},
-@nbpr{natural?}, @nbpr{+}, @nbpr{-}, @nbpr{*}, @nbpr{=}, @nbpr{<}, @nbpr{quotient}, @nbpr{lambda},
-@nbpr{let*}, @nbpr{quote}, @nbpr{cond} and @nbpr{show}}}
-
-@item{A list of empty lists represents a natural number and is self-evaluating.
-Predicate @nbpr{natural?} and the numerical functions mentioned in the previous item work with this
-representation.}
- 
-@item{Non-empty proper lists, natural numbers excepted,
-are evaluated by evaluating the first element,
-which is assumed to produce a macro or a function.
-Subsequently the macro or function is called.
-A function takes care of the evaluation of its arguments in the environment from which it is called.}
-
-@item{Everything else should be avoided.
-Procedure @nbr[value] does no checks.
-Given an erroneous @italic[@tt{sexpr}], results are unpredicatable,
-possibly but not necessarily an error detected by the underlying @(Rckt)
-used to call procedure @nbr[value].
-The error-message probably makes no sense.}]
-
-The following functions and macros already have been described: @nbpr{atom?}, @nbpr{symbol?},
-@nbpr{eq?}, @nbpr{null?}, @nbpr{cons}, @nbpr{car}, @nbpr{cdr}, @nbpr{lambda}, @nbpr{let*},
-@nbpr{quote}, @nbpr{cond} and @nbpr{show}. Below we describe
-@nbpr{boolean?}, @nbr[zero?], @nbr[add1], @nbr[sub1],  @nbr[list], @nbr[length], @nbpr{natural?}
-@nbpr{+}, @nbpr{-} @nbpr{*}, @nbpr{=}, @nbpr{<} and @nbpr{quotient}.
-
-@elemtag{boolean?}
-@defproc[#:kind "predicate" (boolean? (obj any/c)) #,(nbpr "boolean?")]{
-Same as in @(Rckt).}
+The following predicates and functions are implemented too:
+              
+@elemtag{natural?}
+@defproc[#:kind "predicate" (natural? (obj #,(nbpr "sexpr?"))) boolean?]{
+Same as @nbr[(and (list? obj) (andmap null? obj))].}
 
 @elemtag{zero?}
-@defproc[#:kind "predicate" (zero? (obj any/c)) #,(nbpr "boolean?")]{
-Same as @nbpr{null?}.}
+@defproc[#:kind "predicate" (zero? (obj #,(nbpr "sexpr?"))) boolean?]{
+Same as @nbr[(#,(nbpr "eq?") obj #,(nbpr "zero"))], but not raising an error if @nbr[obj] is not an
+@elemref["atom?"]{atom}.}
+
+@elemtag{zero}
+@defthing[zero #,(nbpr "natural?") #:value ()]
 
 @elemtag{add1}
-@Defproc[(add1 (obj #,(nbpr "natural?"))) #,(nbpr "natural?")]{
-Same as @nbr[(cons (quote ()) obj)].}
+@Defproc[(add1 (n #,(nbpr "natural?"))) #,(nbpr "natural?")]{
+Same as @nbr[(cons '() n)].}
 
-@elemtag{sub1}
+@elemtag{aub1}
 @Defproc[(sub1 (n #,(nbpr "natural?"))) #,(nbpr "natural?")]{
-Same as @nbpr{cdr}, but if @nbr[n] is zero, (id est @nbr[()]) is returned,
-as though @tt{0-1=0}.
+Same as @nbr[(cdr n)]. Error if @nbr[n] is @nbpr{zero}.}
 
-@Interaction[
-(value '(sub1 ()))
-(value '(sub1 (())))
-(value '(sub1 (()())))
-(value '(sub1 (()()())))]}
+@elemtag{+}
+@Defproc[(+ (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "natural?")]{
+Same as @nbr[(append n m)].@(lb)
+Within the @nbr[source-code] implemented without using function @nbr[append].}
+
+@elemtag{-}
+@Defproc[(- (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "natural?")]{
+@nbr[n] minus @nbr[m], but @nbpr{zero} if @nbr[(#,(nbpr "<") n m)].}
+
+@elemtag{*}
+@Defproc[(* (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "natural?")]{
+Product of @nbr[n] and @nbr[m].}
+
+@elemtag{quotient}
+@Defproc[(quotient (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "natural?")]{
+Greatest @elemref["natural?"]{natural number} not greater than @nbr[n]/@nbr[m].
+Error when @nbr[m] is @nbpr{zero}.}
+
+@elemtag{remainder}
+@Defproc[(remainder (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "natural?")]{
+Same as @nbr[(- n (* m (#,(nbpr "quotient") n m)))].
+Error when @nbr[m] is @nbpr{zero}.}
+
+@elemtag{=}
+@defproc[#:kind "relation" (= (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) boolean?]
+
+@elemtag{<}
+@defproc[#:kind "relation" (< (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) boolean?]
+
+@section{Other predicates and functions.}
+
+In addition the interpreter implements the following predicate and functions.
+
+@elemtag{boolean?}
+@defproc[#:kind "predicate" (boolean? (obj #,(nbpr "sexpr?"))) boolean?]{
+@nbr[#t] if the @nbr[obj] is a @nber["boolean?"]{boolean},
+else @nbr[#f]}
 
 @elemtag{list}
-@Defproc[(list (obj any/c) ...) list?]{
-Same as in @(Rckt). This is the only function acting as though it has @nbr[arity-at-least].@(lb)
-In the @nbr[source-code] it is made with functions of fixed arity only.}
+@Defproc[(list (element #,(nbpr "sexpr?"))) (listof #,(nbpr "sexpr?"))]{
+Same as in @(Rckt), but every element must be a @elemref["sexpr?"]{sexpr}.
+This is the one and only function in the interpreter accepting an arbitrary number of arguments.
+It is implemented with functions of fixed arity only, though.}
 
-@elemtag{length}
-@Defproc[(length (lst list?)) #,(nbpr "natural?")]{
-Returns the number of elements in @nbr[lst].
-Notice that this number is represented by a list of empty lists.
+@elemtag{not}
+@Defproc[(not (b #,(nber "sexpr?" "sexpr?"))) boolean?]{
+Returns @nbr[#t] if @nbr[b] is @nbr[#f], returns @nbr[#f] in all other cases.}
 
-@Interaction[
-(value '(length '(a b c)))]}
+@section[#:tag "meta-recursivity"]{Meta-recursivity}
 
-@elemtag{natural?}
-@defproc[#:kind "predicate" (natural? (obj any/c)) #,(nbpr "boolean?")]{
-Predicate for natural numbers. Such a number is represented by a list of empty lists.
-Natural numbers are self-evaluating. They don't need a quote.
-
-@Interaction[
-(value '(natural? (quote (()()()))))
-(code:comment "Natural numbers are self-evaluating. Therefore the quote can be omitted.")
-(value '(natural? (()()())))
-(value '(natural? (quote a)))]
-
-The following yields an error:
-
-@Interaction[
-(value '(natural? 3))]
-
-The error is a consequence of the fact that @nbr[3] is not accepted as a @elemref["sexpr?"]{sexpr}.}
-
-@elemtag{+}@elemtag{-}@elemtag{*}@elemtag{quotient}@elemtag{=}@elemtag{<}
-@deftogether[
-(@Defproc[(+ (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "natural?")]
-@Defproc[(- (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "natural?")]
-@Defproc[(* (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "natural?")]
-@Defproc[(quotient (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "natural?")]
-@Defproc[(= (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "boolean?")]
-@Defproc[(< (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "boolean?")])]{
-Work for natural numbers represented by lists of empty lists.@(lb)
-Function @nbpr{-} returns zero if @nbr[(< n m)].}
-
-The language implemented by function @nbr[value] is restricted to @elemref["sexpr?"]{sexprs} too,
-but has a larger vocabulary for its top-environment than that defined by
-@racket[(submod "restrictions.rkt" restrictions)]. In fact the @nbr[source-code] is a
-@nbpr{let*}-form. This enhances readability for the human eye.
-In @nbhll["restrictions.rkt"]{restrictions.rkt}, @nbpr{let*} is redefined such as to expand to
-a nested @nbpr{lambda}-form. Function @nbr[value] implements @nbpr{let*} in the same way.
-Because the expansion must result in a @elemref["sexpr?"]{sexpr},
-it is not fully hygienic.
-For this reason the expansion uses a very improbable symbol in stead of symbol @nbpr{lambda}:
-
-@Interaction[(value (quote ‹a·lambda·symbol·used·for·almost·hygiene·in·macro·let*›))]
-
-Do not use this symbol in @elemref["sexpr?"]{sexprs} to be evaluated by procedure @nbr[value].
-
-@section{Examples}
-
-@Interaction[
-(value '(add1 (()()())))
-(value '((lambda (x) (x (x ()))) add1))]
-
-We'd better allow natural numbers in decimal positional notation.
-Therefore we define:
+As the interpreter is meta-recursive, it can evaluate its own @nbr[source-code].
+However, the result of @nbr[(value source-code)] is a very big @elemref["sexpr?"]{sexpr},
+too big to be shown here. It also is too big for function @(nber "sexpr?" (tt "sexpr?")).
+better definition is:
 
 @Interaction*[
-(define (trafo expr)
- (cond
-  ((natural? expr) (make-list expr '()))
-  ((list? expr) (map trafo expr))
-  (else expr)))
-(code:line)
-(define (retro expr)
- (define (natural? expr) (and (list? expr) (andmap null? expr)))
- (cond
-  ((natural? expr) (length expr))
-  ((list? expr) (map retro expr))
-  (else expr)))
-(code:line)
-(define (*value expr) (retro (value (trafo expr))))
-(code:line)
-(*value '(list (+ 3 4) (- 5 3) (- 3 5) (* 3 4) (quotient 10 3)))]
-
-Function @nbr[value] itself remains working with lists of empty lists.
-A more elaborated example:
+(define (sexpr? obj)
+ (define h (make-hash))
+ (define (sexpr? obj)
+  (or (hash-ref h obj #f)
+   (and (hash-set! h obj #t)
+    (or (atom? obj) (and (pair? obj) (andmap sexpr? obj))))))
+ (sexpr? obj))]
 
 @Interaction*[
-(*value
-'(let*
-  ((self-apply (lambda (f) (f f)))
-   (Y3
-    (lambda (g)
-     (self-apply
-      (lambda (f)
-       (g (lambda (x y z) ((f f) x y z)))))))
-   (fibonacci
+(define value-of-source-code (value source-code))
+(time (sexpr? value-of-source-code))]
+
+Using a hash it is possible to count the flattened length of @nbr[(value source-code)]:
+
+@Interaction*[
+(define (nr-of-atoms x)
+ (define hash (make-hash))
+ (define (nr-of-atoms x)
+  (let ((n (hash-ref hash x #f)))
+   (cond
+    (n)
+    ((list? x)
+     (let ((n (apply + (map nr-of-atoms x))))
+      (hash-set! hash x n) n))
+    (else (hash-set! hash x 1) 1))))
+ (nr-of-atoms x))]
+
+@Interaction*[
+(display
+ (~r #:notation 'exponential
+  (nr-of-atoms value-of-source-code)))]
+
+@ignore[@(tt (format "~v" (value source-code)))]
+
+Nevertheless it is possible to use the interpreter meta-recursively.
+As an example:
+
+@Interaction*[
+(define fibonacci-code
+ (quote
+  (let*
+   ((self-apply
+     (lambda (f) (f f)))
     (Y3
-     (lambda (fibonacci)
-      (lambda (first second n)
-       (cond
-        ((zero? n) (cons first (cons second '())))
-        (#t (cons first (fibonacci second (+ first second) (sub1 n))))))))))
-  (fibonacci 0 1 10)))]
+     (lambda (g)
+      (self-apply
+       (lambda (f) (g (lambda (x y z) ((f f) x y z)))))))
+    (fibo
+     (Y3
+      (lambda (fibo)
+       (lambda (first second n)
+        (cond
+         ((zero? n) (cons first (cons second '())))
+         (#t (cons first
+                   (fibo second (+ first second) (sub1 n))))))))))
+   (fibo
+    ()
+    (())
+    (()()()()()()()()()())))))]
 
-@section{Meta-recursivity}
-
-Meta-recursivity means that the procedure must be able to evaluate its own source code.
-It must even be able to do so at depth of meta-recursion.
-(A check of one meta-level only does not prove true meta-recursivity.
-Even a check of more than one meta-level deep is no proof.)
-
-@Interaction*[
-(define |(value source-code)| (value source-code))
-|(value source-code)|]
-
-However, the representation of the function returned by @nbr[value] is such that
-it cannot be called from @(Rckt).
-
-@Interaction*[
-(|(value source-code)| 'whatever)]
-
-The following works:
+The last three lines are the @elemref["natural?"]{natural numbers} 0, 1 and 10.
+We use function @nbr[length] to convert @elemref["natural?"]{natural numbers}
+of the interpreter to @nbrl[exact-nonnegative-integer?]{those} of @(Rckt):
 
 @Interaction*[
-(time (code:comment "Meta-recursion.")
- (*value
- `(,source-code
-  '((lambda (x y) (x (y 5 4))) add1 *))))]
+(map length (time (value fibonacci-code)))
+(map length (time (value `(,source-code ',fibonacci-code))))]
 
-We can even do a multiple level of meta-recursion:
+The fibonacci-code is too complicated for meta-recursion of depth 2.
+Let's take a simpler expression: @tt[(list "(" @nbpr{add1} " (()()))")]
 
-@Interaction*[
-(time (code:comment "Meta-recursion, two levels deep.")
- (*value
- `(,source-code
-  '(,source-code
-   '((lambda (x y) (x (y 5 4))) add1 *)))))]
+@Interaction[
+(time (value `(,source-code '(,source-code '(add1 (()()))))))]
 
-Well, that is not fast, as we could have expected beforehand.@(lb)
-As conclusion a bogus example:
+More examples in file @nbhll["examples.rkt"]{examples.rkt}.
 
-@Interaction*[
-((value '(lambda (x) x))
-'(monkey)               (code:comment "List of unevaluated arguments.")
- (lambda (x) x)         (code:comment "A phony environment.")
- (lambda (x y z) (y x)) (code:comment "A phony evaluator."))]
-
-More examples in file @hyperlink["../../examples.rkt"]{examples.rkt}.
-
-@bold{@larger{The end}}
+@(larger (larger (bold "The end")))

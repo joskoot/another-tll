@@ -15,7 +15,7 @@
   (for-template "interpreter.rkt" (except-in racket set natural?))
   (for-syntax (except-in racket set natural?) racket/block))
 
-@(define-for-syntax local #f)
+@(define-for-syntax local? #t)
 
 @(provide (all-defined-out))
 
@@ -63,13 +63,13 @@
 @(define-syntax (nbhll stx)
   (syntax-case stx ()
    ((_ x y ...)
-    (if local
+    (if local?
    #'(nb (hyperlink x y ...))
    #'(nb (hyperlink (string-append "../../" x) y ...))))))
 
 @(define-syntax (Defmodule stx)
-  (if local #'(defmodule "interpreter.rkt" #:packages ())
-            #'(defmodule another-tll/interpreter #:packages ())))
+  (if local? #'(defmodule "interpreter.rkt" #:packages ())
+             #'(defmodule another-tll/interpreter #:packages ())))
 
 @(define-syntax-rule (nber x ...) (nb (elemref    x ...)))
 @(define-syntax-rule (nbrl x ...) (nb (racketlink x ...)))
