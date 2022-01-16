@@ -54,7 +54,7 @@ It evaluates the received value in its own top environment.
 Usually one will call the interpreter with quoted argument, for example.
 
 @inset{
-@Interaction[(value '(cons 'a '()))]}}
+@Interaction[(value '(cons 'a '(b c)))]}}
 
 @defthing[source-code #,(nbpr "sexpr?")]{
 Source code of procedure @nbr[value].}
