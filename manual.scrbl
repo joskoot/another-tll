@@ -261,7 +261,7 @@ Returns @nbr[#t] if @nbr[b] is @nbr[#f], returns @nbr[#f] in all other cases.}
 As the interpreter is meta-recursive, it can evaluate its own @nbr[source-code].
 However, the result of @nbr[(value source-code)] is a very big @elemref["sexpr?"]{sexpr},
 too big to be shown here. It also is too big for function @(nber "sexpr?" (tt "sexpr?")).
-better definition is:
+A better definition is:
 
 @Interaction*[
 (define (sexpr? obj)
