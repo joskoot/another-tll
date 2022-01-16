@@ -14,7 +14,7 @@
  (require (only-in racket (null? Null?) (cons Cons) (car Car) (cdr Cdr) (eq? Eq?)))
  (require (only-in racket (boolean? Boolean?) (symbol? Symbol?)))
 
- (define (symbol->uninterned-symbol symbol)
+ (define (symbol->uninterned-symbol symbol) ;  <================   Not in interpreter.rkt.
   (string->uninterned-symbol (~s symbol)))
 
  (define-syntax-rule (define-quote-and-evaluated (quoted evaluated) expr)
