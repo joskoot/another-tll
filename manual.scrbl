@@ -32,7 +32,7 @@ by Danial P. Friedman and Matthias Felleisen
  #:sep (hspace 5)
  #:row-properties '((top top-border bottom-border))]}
 
-Well, I do bother and therefore I'm giving it a shot in the form of two modules in file
+Well, I do bother and therefore I'm giving it a shot in the form of two submodules in file
 @nbhll["interpreter.rkt"]{interpreter.rkt}. 
 Submodule @tt{restrictions} provides restricted versions of the following macros and functions:
 @nbpr{lambda}, @nbpr{let*}, @nbpr{quote}, @nbpr{cond}, @nbpr{atom?}, @nbpr{car}, @nbpr{cdr},
