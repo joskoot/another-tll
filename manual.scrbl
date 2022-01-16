@@ -81,9 +81,10 @@ For example,
 @nbr[(value source-code)] yields an expression with flattened length of almost 4×10@↑{18} atoms.
 A better definition can be found in section @seclink["meta-recursivity"]{Meta-recursivity}.
 
-A @elemref["sexpr?"]{sexpr} must not contain numbers.
-These are implemented in the @nbr[source-code] as lists of @nbr[null], id est,
-with type @nbr[(listof null?)]. See section @secref{Natural-numbers}.
+A @elemref["sexpr?"]{sexpr} must not contain numbers written with digits.
+The interpreter implements functions for natural numbers only and
+uses a representation in terms of lists of @nbr[null].
+@nb{See section} @secref{Natural-numbers}.
 
 @section[#:tag "restrictions"]{Restrictions}
 
@@ -93,7 +94,10 @@ The @nbr[source-code] is written in a very small subset of @(Rckt). The macros a
 Two procedures are added: @nbpr{show} and @nbpr{wrong}.
 The restrictions include those of the inside of the back cover of
 @nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The Little LISPer}.
-
+They also restrict macros @nbpr{lambda} and @nbpr{cond} according to the style of
+@nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The Little LISPer}.
+This style also implies that every object is represented by a @elemref["sexpr?"]{sexpr}.
+See section @seclink["internal-representation"]{Internal representation}.
 
 @elemtag{lambda}
 @defform-remove-empty-lines[@defform[(lambda (formal-argument ...+) body)
@@ -190,7 +194,7 @@ The following predicates and functions are implemented too:
               
 @elemtag{natural?}
 @defproc[#:kind "predicate" (natural? (obj #,(nbpr "sexpr?"))) boolean?]{
-Same as @nbr[(and (list? obj) (andmap null? obj))].}
+Same as @nbr[(listof '())].}
 
 @elemtag{zero?}
 @defproc[#:kind "predicate" (zero? (obj #,(nbpr "sexpr?"))) boolean?]{
@@ -206,7 +210,7 @@ Same as @nbr[(cons '() n)].}
 
 @elemtag{aub1}
 @Defproc[(sub1 (n #,(nbpr "natural?"))) #,(nbpr "natural?")]{
-Same as @nbr[(cdr n)]. Error if @nbr[n] is @nbpr{zero}.}
+@nbpr{zero} if @nbr[n] is @nbpr{zero}, else same as @nbr[(cdr n)].}
 
 @elemtag{+}
 @Defproc[(+ (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "natural?")]{
@@ -255,6 +259,55 @@ It is implemented with functions of fixed arity only, though.}
 @elemtag{not}
 @Defproc[(not (b #,(nber "sexpr?" "sexpr?"))) boolean?]{
 Returns @nbr[#t] if @nbr[b] is @nbr[#f], returns @nbr[#f] in all other cases.}
+
+@section[#:tag "internal-representation"]{Internal representation}
+
+Within the interpreter functions, both closures made by macro @nbpr{lambda} and primitive ones,
+are represented by @elemref["sexpr?"]{sexprs}. For example:
+
+@Interaction[
+(value 'add1)]
+
+@Interaction[
+(value '(lambda (x) (add1 x)))]
+
+Knowing this we can do the following bogus examples:
+
+@Interaction[
+(value '('(primitive add1) (()())))]
+
+@Interaction[
+(value
+'('(closure (() (n) (add1 n)))
+  (()())))]
+
+Or even:
+
+@Interaction[
+(value
+'('(closure (() (n) ('(primitive add1) n)))
+  (()())))]
+
+This does not mean a non implemented primitive can be applied,@(lb)
+for example, the following raises an error:
+
+@Interaction[
+(value '('(primitive void)))]
+
+Nevertheless:
+
+@Interaction[
+(code:line (value ''(primitive void)) (code:comment #,(black (roman "No error raised"))))]
+
+The bogus can be avoided by using uninterned symbols @tt{closure} and @tt{primitive}
+within the @nbr[source-code],
+but the restrictions do not provide the means for this.
+Another method within the restrictions would be to represent closures and primitives
+and even macros by functions.
+See package @nbhl["https://github.com/joskoot/The-Little-LISPer"]{The Little Lisper}.
+But even with this system bogus is not entirely excluded.
+See at the end of the documentation of package
+@nbhl["https://github.com/joskoot/The-Little-LISPer"]{The Little Lisper}.
 
 @section[#:tag "meta-recursivity"]{Meta-recursivity}
 

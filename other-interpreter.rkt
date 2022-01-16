@@ -8,10 +8,14 @@
 
  (provide lambda cond let* atom? car cdr cons eq? null? quote show wrong)
  (provide #%module-begin #%app #%datum provide define-quote-and-evaluated)
+ (provide symbol->uninterned-symbol)
 
  (require (only-in racket (lambda Lambda) (quote Quote) (cond Cond) (let* Let*)))
  (require (only-in racket (null? Null?) (cons Cons) (car Car) (cdr Cdr) (eq? Eq?)))
  (require (only-in racket (boolean? Boolean?) (symbol? Symbol?)))
+
+ (define (symbol->uninterned-symbol symbol)
+  (string->uninterned-symbol (~s symbol)))
 
  (define-syntax-rule (define-quote-and-evaluated (quoted evaluated) expr)
   (define-values (quoted evaluated) (values 'expr expr)))
@@ -122,6 +126,9 @@
   ;  (cdddr (lambda (x) (cdr (cdr (cdr x)))))
     (wrap (lambda (x) (cons x (quote ()))))
 
+    (closure-symbol (symbol->uninterned-symbol 'closure))
+    (primitive-symbol (symbol->uninterned-symbol 'primitive))
+
     (initial-table
      (lambda (name)
       (cond
@@ -131,7 +138,7 @@
        ((eq? name (quote let*  )) (build2 (quote macro) name))
        ((eq? name (quote value )) (build2 (quote macro) name))
        ((eq? name (quote zero  )) (quote ()))
-       (#t (build2 (quote primitive) name)))))
+       (#t (build2 primitive-symbol name)))))
 
     (lookup-in-entry-help
      (Y4
@@ -162,7 +169,7 @@
 
     (*quote (lambda (e table) (car e)))
 
-    (*lambda (lambda (e table) (build2 (quote closure) (cons table e))))
+    (*lambda (lambda (e table) (build2 closure-symbol (cons table e))))
 
     (expand-let*
      (Y2
@@ -350,9 +357,9 @@
          (apply-operator
           (lambda (operator args table)
            (cond
-            ((eq? (car operator) (quote primitive))
+            ((eq? (car operator) primitive-symbol)
              (apply-primitive (cadr operator) (evlis args table)))
-            ((eq? (car operator) (quote closure))
+            ((eq? (car operator) closure-symbol)
              (apply-closure (cadr operator) (evlis args table)))
             ((eq? (car operator) (quote macro))
              (apply-macro (cadr operator) args table)))))
@@ -401,3 +408,22 @@
 ;(sexpr? (value source-code))
 ;
 ;(time (value `(,source-code '(,source-code '((lambda (fun n) (fun (fun n))) add1 (()()()))))))
+
+(define-syntax (catch-exn stx)
+ (syntax-case stx ()
+  ((_ expr)
+ #'(with-handlers
+    ((exn:fail? (λ (exn) (fprintf (current-error-port) "~a~n" (exn-message exn)) (void))))
+    expr))))
+
+(catch-exn (value '('(primitive add1) (()()))))
+
+(catch-exn
+ (value
+ '('(closure (() (n) (add1 n)))
+   (()()))))
+
+(catch-exn
+ (value
+ '('(closure (() (n) ('(primitive add1) n)))
+  (()()))))
