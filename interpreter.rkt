@@ -395,3 +395,5 @@
 ;
 ;(sexpr? (value source-code))
 ;
+;(time (value `(,source-code '(,source-code '((lambda (fun n) (fun (fun n))) add1 (()()()))))))
+

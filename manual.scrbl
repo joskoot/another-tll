@@ -49,8 +49,12 @@ The interpreter is exported in two forms:
  #:sep (hspace 1)]}
 
 @Defproc[(value (sexpr #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{
-Called from @[Rckt] procedure it receives the evaluated argument @nbr[sexpr].@(lb)
-It evaluates the received value in its own top environment.}
+Called from @[Rckt] procedure it receives the evaluated argument @nbr[sexpr].
+It evaluates the received value in its own top environment.
+Usually one will call the interprter with quoted argument, for example.
+
+@inset{
+@Interaction[(value '(cons 'a '()))]}}
 
 @defthing[source-code #,(nbpr "sexpr?")]{
 Source code of procedure @nbr[value].}
@@ -97,7 +101,8 @@ The restrictions include those of the inside of the back cover of
 ((formal-argument id)
  (body sexpr))]{
 At least one @nbr[formal-argument] required and the @nbr[body] must consist of one
-@elemref["sexpr?"]{sexpr} only. No optional or keyword arguments.}]
+@elemref["sexpr?"]{sexpr} only. No optional or keyword arguments,
+neither a rest-argument .}]
 
 @elemtag{let*}
 @defform-remove-empty-lines[@defform[(let* ((var expr) ...) body)
@@ -124,7 +129,7 @@ Like in @(Rckt), but the @nbr[datum] is restricted to a @elemref["sexpr?"]{sexpr
 ((test sexpr)
  (expr sexpr))]{
 Like in @(Rckt), but with the restriction that each @nbr[test] must yield a
-@elemref["boolean?"]{boolean} and at least one @nbr[test] must succeed.}]
+@nbrl[boolean?]{boolean} and at least one @nbr[test] must succeed.}]
 
 @defproc[#:kind "predicate" (atom? (obj #,(nbpr "sexpr?"))) boolean?]{
 Returns @nbr[#t] if and only if the @nbr[obj] is a @nbrl[symbol?]{symbol},
@@ -236,7 +241,7 @@ Error when @nbr[m] is @nbpr{zero}.}
 
 In addition the interpreter implements the following predicate and functions.
 
-@elemtag{boolean?}
+@;@elemtag{boolean?}
 @defproc[#:kind "predicate" (boolean? (obj #,(nbpr "sexpr?"))) boolean?]{
 @nbr[#t] if the @nbr[obj] is a @nber["boolean?"]{boolean},
 else @nbr[#f]}
@@ -300,8 +305,7 @@ As an example:
 (define fibonacci-code
  (quote
   (let*
-   ((self-apply
-     (lambda (f) (f f)))
+   ((self-apply (lambda (f) (f f)))
     (Y3
      (lambda (g)
       (self-apply
@@ -309,6 +313,8 @@ As an example:
     (fibo
      (Y3
       (lambda (fibo)
+       (code:comment "Return a list of the first n+2 numbers of the")
+       (code:comment "fibonacci sequence starting with 0 and 1.")
        (lambda (first second n)
         (cond
          ((zero? n) (cons first (cons second '())))
@@ -328,10 +334,14 @@ of the interpreter to @nbrl[exact-nonnegative-integer?]{those} of @(Rckt):
 (map length (time (value `(,source-code ',fibonacci-code))))]
 
 The fibonacci-code is too complicated for meta-recursion of depth 2.
-Let's take a simpler expression: @tt[(list "(" @nbpr{add1} " (()()))")]
+Let's take a simpler expression: @tt{((@nbpr{lambda} (fun n) (fun (fun n))) @nbpr{add1} (()()()))}
 
 @Interaction[
-(time (value `(,source-code '(,source-code '(add1 (()()))))))]
+(time
+ (value
+ `(,source-code
+  '(,source-code
+   '((lambda (fun n) (fun (fun n))) add1 (()()()))))))]
 
 More examples in file @nbhll["examples.rkt"]{examples.rkt}.
 

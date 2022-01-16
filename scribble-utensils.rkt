@@ -15,7 +15,7 @@
   (for-template "interpreter.rkt" (except-in racket set natural?))
   (for-syntax (except-in racket set natural?) racket/block))
 
-@(define-for-syntax local? #f)
+@(define-for-syntax local? #t)
 
 @(provide (all-defined-out))
 
