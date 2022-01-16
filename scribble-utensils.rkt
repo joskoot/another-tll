@@ -69,7 +69,7 @@
 
 @(define-syntax (Defmodule stx)
   (if local #'(defmodule "interpreter.rkt" #:packages ())
-            #'(defmodule The-Little-LISPer/interpreter #:packages ())))
+            #'(defmodule another-tll/interpreter #:packages ())))
 
 @(define-syntax-rule (nber x ...) (nb (elemref    x ...)))
 @(define-syntax-rule (nbrl x ...) (nb (racketlink x ...)))
