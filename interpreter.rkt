@@ -119,18 +119,23 @@
   ; (cdaar (lambda (x) (cdr (car (car x)))))
   ; (cdadr (lambda (x) (cdr (car (cdr x)))))
   ; (cddar (lambda (x) (cdr (cdr (car x)))))
-  ;  (cdddr (lambda (x) (cdr (cdr (cdr x)))))
+  ; (cdddr (lambda (x) (cdr (cdr (cdr x)))))
     (wrap (lambda (x) (cons x (quote ()))))
 
+  ; Use a very impropable name for lambda-forms in the expansion of let*-forms.  
+ 
+    (*lambda-from-let* '‘‹a·lambda·symbol·used·for·almost·hygiene·in·macro·let*›’)
+    
     (initial-table
      (lambda (name)
       (cond
-       ((eq? name (quote lambda)) (build2 (quote macro) name))
-       ((eq? name (quote quote )) (build2 (quote macro) name))
-       ((eq? name (quote cond  )) (build2 (quote macro) name))
-       ((eq? name (quote let*  )) (build2 (quote macro) name))
-       ((eq? name (quote value )) (build2 (quote macro) name))
-       ((eq? name (quote zero  )) (quote ()))
+       ((eq? name (quote lambda))    (build2 (quote macro) name))
+       ((eq? name *lambda-from-let*) (build2 (quote macro) (quote lambda)))
+       ((eq? name (quote quote ))    (build2 (quote macro) name))
+       ((eq? name (quote cond  ))    (build2 (quote macro) name))
+       ((eq? name (quote let*  ))    (build2 (quote macro) name))
+       ((eq? name (quote value ))    (build2 (quote macro) name))
+       ((eq? name (quote zero  ))    (quote ()))
        (#t (build2 (quote primitive) name)))))
 
     (lookup-in-entry-help
@@ -172,7 +177,7 @@
          ((null? bindings) body)
          (#t
           (build2
-           (build3 (quote lambda) (wrap (caar bindings)) (expand-let* (cdr bindings) body))
+           (build3 *lambda-from-let* (wrap (caar bindings)) (expand-let* (cdr bindings) body))
            (cadar bindings))))))))
 
     (*identifier (lambda (e table) (lookup-in-table e table initial-table)))

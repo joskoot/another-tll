@@ -78,7 +78,7 @@ Predicate @nbpr{sexpr?} is not provided. It complies to the following descriptio
 
 The above definition of @nbpr{sexpr?} can be very slow for big and deeply nested expressions.
 For example,
-@nbr[(value source-code)] yields an expression with flattened length of almost 4×10@↑{18} atoms.
+@nbr[(value source-code)] yields an expression with flattened length of almost 8×10@↑{18} atoms.
 A better definition can be found in section @seclink["meta-recursivity"]{Meta-recursivity}.
 
 A @elemref["sexpr?"]{sexpr} must not contain numbers written with digits.
