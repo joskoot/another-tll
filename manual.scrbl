@@ -49,7 +49,7 @@ The interpreter is exported in two forms:
  #:sep (hspace 1)]}
 
 @Defproc[(value (sexpr #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{
-Called from @[Rckt] procedure it receives the evaluated argument @nbr[sexpr].
+Called from @[Rckt] the function receives the evaluated argument @nbr[sexpr].
 It evaluates the received value in its own top environment.
 Usually one will call the interpreter with quoted argument, for example.
 
@@ -329,6 +329,7 @@ A better definition is:
 (define value-of-source-code (value source-code))
 (time (sexpr? value-of-source-code))]
 
+The times are in milliseconds.@(lb)
 Using a hash it is possible to count the flattened length of @nbr[(value source-code)]:
 
 @Interaction*[
