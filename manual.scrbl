@@ -351,8 +351,20 @@ Using a hash it is possible to count the flattened length of @nbr[(value source-
 
 @ignore[@(tt (format "~v" (value source-code)))]
 
-Nevertheless it is possible to use the interpreter meta-recursively.
-As an example:
+How is it possible that @tt{value-of-source-code} fits in memory?
+Well, let's see with @nbr[print-graph] enabled:
+
+@Interaction*[
+(string-length
+ (parameterize ((print-graph #t))
+  (format "~v" (value source-code))))]
+
+It appears that most parts are shared in a nested way.
+Compare this with:
+
+@Interaction[(~r #:notation 'exponential (expt 2 (expt 2 (expt 2 (expt 2 2)))))]
+
+It is possible to use the interpreter meta-recursively. As an example:
 
 @Interaction*[
 (define fibonacci-code
@@ -380,14 +392,23 @@ As an example:
 
 The last three lines are the @elemref["natural?"]{natural numbers} 0, 1 and 10.
 We use function @nbr[length] to convert @elemref["natural?"]{natural numbers}
-of the interpreter to @nbrl[exact-nonnegative-integer?]{those} of @(Rckt):
+of the interpreter to @nbrl[exact-nonnegative-integer?]{those} of @(Rckt).
+First without meta-recursion:
 
 @Interaction*[
-(map length (time (value fibonacci-code)))
+(map length (time (value fibonacci-code)))]
+
+No with one level of meta-recursion:
+
+@Interaction*[
 (map length (time (value `(,source-code ',fibonacci-code))))]
 
 The fibonacci-code is too complicated for meta-recursion of depth 2.
-Let's take a simpler expression: @tt{((@nbpr{lambda} (fun n) (fun (fun n))) @nbpr{add1} (()()()))}
+Memory is not the problem. Time is.
+Trying meta-recursion at depth 2 with the @tt{fibonacci-code} would take hours of computation.
+Let's take a simpler expression:
+
+@inset{@tt{((@nbpr{lambda} (fun n) (fun (fun n))) @nbpr{add1} (()()()))}}
 
 @Interaction[
 (time
