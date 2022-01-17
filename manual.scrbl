@@ -289,27 +289,12 @@ Knowing this we can do the following bogus examples:
 (value '('(primitive add1) (()())))]
 
 @Interaction[
-(value
-'('(closure (() (n) (add1 n)))
-  (()())))]
+(value '('(closure (() (n) (add1 n))) (()())))]
 
 Or even:
 
 @Interaction[
-(value
-'('(closure (() (n) ('(primitive add1) n)))
-  (()())))]
-
-This does not mean a non implemented primitive can be applied,@(lb)
-for example, the following raises an error:
-
-@Interaction[
-(value '('(primitive void)))]
-
-Nevertheless:
-
-@Interaction[
-(code:line (value ''(primitive void)) (code:comment #,(black (roman "No error raised"))))]
+(value '('(closure (() (n) ('(primitive add1) n))) (()())))]
 
 The bogus can be avoided by using uninterned symbols @tt{closure} and @tt{primitive}
 within the @nbr[source-code],
