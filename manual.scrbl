@@ -100,7 +100,7 @@ This style also implies that every object is represented by a @elemref["sexpr?"]
 See section @seclink["internal-representation"]{Internal representation}.
 
 @elemtag{lambda}
-@defform-remove-empty-lines[@defform[(lambda (formal-argument ...+) body)
+@defform-remove-empty-lines[@defform[#:kind "macro" (lambda (formal-argument ...+) body)
 #:grammar
 ((formal-argument id)
  (body sexpr))]{
@@ -109,26 +109,38 @@ At least one @nbr[formal-argument] required and the @nbr[body] must consist of o
 neither a rest-argument .}]
 
 @elemtag{let*}
-@defform-remove-empty-lines[@defform[(let* ((var expr) ...) body)
+@defform-remove-empty-lines[@defform[#:kind "macro" (let* ((var expr) ...) body)
 #:grammar
 ((var id)
  (expr sexpr)
  (body sexpr))]{
 Like in @(Rckt) but restricted to a @nbr[body] of one @elemref["sexpr?"]{sexpr} only.
+@nbpr{let*} is used to enhance read@(-?)ability of the @nbr[source-code] for the human eye.
+Because the interpreter is intended to be meta-recursive,
+it implements @nbpr{let*}-forms too.
 The interpreter expands a @nbpr{let*}-form to a nest of @nbpr{lambda}-forms
 and evaluates the expanded form.
-@nbpr{let*} is used to enhance readability for the human eye.
-Because the interpreter is intended to be meta-recursive,
-it implements @nbpr{let*}-forms too.}]
+The expansion is (almost) hygienic.
+Rebinding @tt{lambda} does not confuse macro @nbpr{let*}, for example:
+
+@Interaction[
+(value '(let* ((lambda add1)) (let* ((n (()()))) (lambda n))))]
+
+In the expansion, macro @nbpr{let*} uses an alternative name for macro @nbpr{lambda}.
+It is very impropable that this name will occur in a @elemref["sexpr?"]{sexpr}
+given by the user to function @nbr[value].
+
+@note{There are more sophisticated means to enhance hygiene,
+but the @seclink["restrictions"]{restrictions} prevent their use.}}]
 
 @elemtag{quote}
-@defform-remove-empty-lines[@defform[(quote datum)
+@defform-remove-empty-lines[@defform[#:kind "macro" (quote datum)
 #:grammar ((datum sexpr))]{
 Like in @(Rckt), but the @nbr[datum] is restricted to a @elemref["sexpr?"]{sexpr}.}]
 
 @elemtag{cond}
 @defform-remove-empty-lines[
-@defform[(cond ((test expr) ...+))
+@defform[#:kind "macro" (cond ((test expr) ...+))
 #:grammar
 ((test sexpr)
  (expr sexpr))]{
