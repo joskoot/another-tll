@@ -79,6 +79,8 @@ Predicate @nbpr{sexpr?} is not provided. It complies to the following descriptio
 The above definition of @nbpr{sexpr?} can be very slow for big and deeply nested expressions.
 For example,
 @nbr[(value source-code)] yields an expression with flattened length of almost 8×10@↑{18} atoms.
+This means that function @nbpr{sexpr?} would need some centuries to check
+that @nbr[(value source-code)] is a @elemref["sexpr?"]{sexpr}.
 A better definition can be found in section @seclink["meta-recursivity"]{Meta-recursivity}.
 
 A @elemref["sexpr?"]{sexpr} must not contain numbers written with digits.
@@ -396,7 +398,7 @@ First without meta-recursion:
 @Interaction*[
 (map length (time (value fibonacci-code)))]
 
-No with one level of meta-recursion:
+Now with one level of meta-recursion:
 
 @Interaction*[
 (map length (time (value `(,source-code ',fibonacci-code))))]
