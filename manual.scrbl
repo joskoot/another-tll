@@ -27,7 +27,7 @@ by Danial P. Friedman and Matthias Felleisen
 @inset{@Tabular[
 (((list @nb{Does that mean we can run the interpreter}@(lb)
         @nb{on the interpreter if we do the transforma-}@(lb)
-        @nb{tion with the Y-combinator.})
+        @nb{tion with the Y-combinator?})
   @nb{Yes, but don't bother.}))
  #:sep (hspace 5)
  #:row-properties '((top top-border bottom-border))]}
@@ -418,6 +418,12 @@ Let's take a simpler expression:
   '(,source-code
    '((lambda (fun n) (fun (fun n))) add1 (()()()))))))]
 
+No example of meta-recursion at depth 3. Takes too much time. For example:
+
+@inset{@nbr[(value `(,source-code '(,source-code '(,source-code '(add1 (()()))))))]}
+
+took 20 minutes on my PC (AMD Ryzen 5 1500X Quad-core Processor, 3.50 GHz),@(lb)
+using DrRacket 8.3 bc, debugging off.
 More examples in file @nbhll["examples.rkt"]{examples.rkt}.
 
 @(larger (larger (bold "The end")))
