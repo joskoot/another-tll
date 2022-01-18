@@ -13,7 +13,7 @@
   (for-label "interpreter.rkt")
   (for-template "interpreter.rkt"))
 
-@(define-for-syntax local? #f)
+@(define-for-syntax local? #t)
 
 @(provide (all-defined-out))
 
@@ -67,6 +67,9 @@
   (if local? #'(defmodule "interpreter.rkt" #:packages ())
              #'(defmodule another-tll/interpreter #:packages ())))
 
+@(define (tll)
+ @nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The Little LISPer})
+
 @(define-syntax-rule (nber x ...) (nb (elemref    x ...)))
 @(define-syntax-rule (nbrl x ...) (nb (racketlink x ...)))
 @(define-syntax-rule (nbr  x ...) (nb (racket     x ...)))
@@ -75,7 +78,7 @@
 @(define-syntax-rule (defmacro* x ...) (defform* #:kind "macro" x ...))
 @(define (tt . content) (element 'tt (apply list content)))
 @(define(minus) (tt "-"))
-@(define(-?) (element "roman" ?-))
+@(define (-?) (element "roman" ?-))
 @(define (note . x) (inset (apply smaller x)))
 @(define (inset . x) (apply nested #:style 'inset x))
 @(define (expt-1) @↑{@(minus)1})
