@@ -13,7 +13,7 @@
   (for-label "interpreter.rkt")
   (for-template "interpreter.rkt"))
 
-@(define-for-syntax local? #t)
+@(define-for-syntax local? #f)
 
 @(provide (all-defined-out))
 
