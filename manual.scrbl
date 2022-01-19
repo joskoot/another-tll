@@ -13,6 +13,20 @@
   (for-syntax
    (except-in racket set natural?)))
 
+@(define (nr-of-atoms x)
+ (define hash (make-hash))
+ (define (nr-of-atoms x)
+  (let ((n (hash-ref hash x #f)))
+   (cond
+    (n)
+    ((list? x) (let ((n (apply + (map nr-of-atoms x)))) (hash-set! hash x n) n))
+    (else (hash-set! hash x 1) 1))))
+ (nr-of-atoms x))
+
+@(define nr-of-atoms-value-source (nr-of-atoms (value source-code)))
+
+@(define nr-of-atoms-value-source-str (~r #:notation 'exponential nr-of-atoms-value-source))
+
 @title[#:version ""]{Meta-recursive interpreter@(lb)inspired by The Little LISPer}
 @author{Jacob J. A. Koot}
 
@@ -76,11 +90,7 @@ Predicate @nbpr{sexpr?} is not provided. It complies to the following descriptio
   (null? obj)))]}
 
 The above definition of @nbpr{sexpr?} can be very slow for big and deeply nested expressions.
-For example,
-@nbr[(value source-code)] yields an expression with flattened length of almost 31.5×10@↑{18} atoms.
-This means that function @nbpr{sexpr?} would need some centuries to check
-that @nbr[(value source-code)] is a @elemref["sexpr?"]{sexpr}.
-A better definition can be found in section @seclink["meta-recursivity"]{Meta-recursivity}.
+@nb{A better} definition can be found in section @seclink["meta-recursion"]{Meta-recursion}.
 
 A @elemref["sexpr?"]{sexpr} must not contain numbers written with digits.
 The interpreter implements functions for natural numbers only and
@@ -186,7 +196,7 @@ Same as @nbr[(error (format "~s" why) what)] in @(Rckt),
 but with @elemref["sexpr?"]{sexprs} as arguments.
 Used in the @nbr[source-code] for error messages,
 but error detection is very poor.
-Included for meta-recursivity.
+Included for meta-recursion.
 Hence available for the user too.}
 
 @section[#:tag "Natural-numbers"]{Natural numbers}
@@ -308,7 +318,7 @@ But even with this system bogus is not entirely excluded.
 See at the end of the documentation of package
 @nbhl["https://github.com/joskoot/The-Little-LISPer"]{The Little Lisper}.
 
-@section[#:tag "meta-recursivity"]{Meta-recursivity}
+@section[#:tag "meta-recursion"]{Meta-recursion}
 
 As the interpreter is meta-recursive, it can evaluate its own @nbr[source-code].
 However, the result of @nbr[(value source-code)] is a very big @elemref["sexpr?"]{sexpr},
@@ -354,10 +364,13 @@ Using a hash it is possible to count the flattened length of @nbr[(value source-
 How is it possible that @tt{value-of-source-code} fits in memory?
 Well, let's see with @nbr[print-graph] enabled:
 
-@Interaction*[
-(string-length
- (parameterize ((print-graph #t))
-  (format "~v" (value source-code))))]
+@Interaction[
+(parameterize
+ ((current-output-port (open-output-string))
+  (print-graph #t)
+  (print-as-expression #f))
+ (write (value source-code))
+ (string-length (get-output-string (current-output-port))))]
 
 It appears that most parts are shared in a nested way.
 Compare this with:

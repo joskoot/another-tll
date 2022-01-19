@@ -13,11 +13,12 @@
   (for-label "interpreter.rkt")
   (for-template "interpreter.rkt"))
 
-@(define-for-syntax local? #f)
+@(define-for-syntax local? #t)
 
 @(provide (all-defined-out))
 
 @(define-syntax-rule (Interaction x ...)
+
   (interaction #:eval
    (make-base-eval
     #:lang '(begin
@@ -28,6 +29,7 @@
   (interaction #:eval evaller x ...))
 
 @(define (make-evaller)
+
   (make-base-eval
    #:lang '(begin
             (require racket "interpreter.rkt" )
