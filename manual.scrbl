@@ -105,7 +105,8 @@ The @nbr[source-code] is written in a very small subset of @(Rckt). The macros a
 Two procedures are added: @nbpr{show} and @nbpr{wrong}.
 The restrictions include those of the inside of the back cover of @(tll).
 They also restrict macros @nbpr{lambda} and @nbpr{cond} according to the style of @(tll).
-This style also implies that every object is represented by a @elemref["sexpr?"]{sexpr}.
+This style also implies that every object is represented by a @elemref["sexpr?"]{sexpr},
+functions and macros included.
 See section @seclink["internal-representation"]{Internal representation}.
 
 @elemtag{lambda}
@@ -286,7 +287,7 @@ Returns @nbr[#t] if @nbr[b] is @nbr[#f], returns @nbr[#f] in all other cases.}
 
 @section[#:tag "internal-representation"]{Internal representation}
 
-Within the interpreter functions, both closures made by macro @nbpr{lambda} and primitive ones,
+Within the interpreter macros and functions, both closures made by macro @nbpr{lambda} and primitive ones,
 are represented by @elemref["sexpr?"]{sexprs}. For example:
 
 @Interaction[
@@ -335,7 +336,7 @@ A better definition is:
  (sexpr? obj))]
 
 @Interaction*[
-(define value-of-source-code (value source-code))
+(define |(value source-code)| (value source-code))
 (time (sexpr? value-of-source-code))]
 
 The times are in milliseconds.@(lb)
@@ -357,20 +358,16 @@ Using a hash it is possible to count the flattened length of @nbr[(value source-
 @Interaction*[
 (display
  (~r #:notation 'exponential
-  (nr-of-atoms value-of-source-code)))]
+  (nr-of-atoms |(value source-code)|)))]
 
-@ignore[@(tt (format "~v" (value source-code)))]
-
-How is it possible that @tt{value-of-source-code} fits in memory?
+How is it possible that @tt{value-of-source-code} fits in memory?@(lb)
 Well, let's see with @nbr[print-graph] enabled:
 
-@Interaction[
+@Interaction*[
 (parameterize
- ((current-output-port (open-output-string))
-  (print-graph #t)
+ ((print-graph #t)
   (print-as-expression #f))
- (write (value source-code))
- (string-length (get-output-string (current-output-port))))]
+ (string-length (~s |(value source-code)|)))]
 
 It appears that most parts are shared in a nested way.
 Compare this with:
