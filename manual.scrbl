@@ -337,7 +337,7 @@ A better definition is:
  (sexpr? obj))]
 
 @Interaction*[
-(define |(value source-code)| (value source-code))
+(define value-of-source-code (value source-code))
 (time (sexpr? value-of-source-code))]
 
 The times are in milliseconds.@(lb)
@@ -359,7 +359,7 @@ Using a hash it is possible to count the flattened length of @nbr[(value source-
 @Interaction*[
 (display
  (~r #:notation 'exponential
-  (nr-of-atoms |(value source-code)|)))]
+  (nr-of-atoms value-of-source-code)))]
 
 How is it possible that @tt{value-of-source-code} fits in memory?@(lb)
 Well, let's see with @nbr[print-graph] enabled:
@@ -368,7 +368,7 @@ Well, let's see with @nbr[print-graph] enabled:
 (parameterize
  ((print-graph #t)
   (print-as-expression #f))
- (string-length (~s |(value source-code)|)))]
+ (string-length (~s value-of-source-code)))]
 
 Run module @nbhll["checks.rkt"]{checks.rkt"} for a printout.
 Many parts in @nbr[(value source-code)] are shared and sharing may be nested.
