@@ -447,7 +447,7 @@ With two levels of meta-recursion:
 
 No example of meta-recursion at depth 3. Takes too much time. For example:
 
-@inset{@nbr[
+@inset{@racketblock[
 (value
 `(,source-code
  '(,source-code
