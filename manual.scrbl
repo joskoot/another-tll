@@ -72,6 +72,10 @@ Usually one will call the interpreter with quoted argument, for example.
 @defthing[source-code #,(nbpr "sexpr?")]{
 Source code of procedure @nbr[value].}
 
+Because the interpreter is meta-recursive, it can be applied to its own @nbr[source-code]:
+
+
+
 Predicate @nbpr{sexpr?} is not provided. It complies to the following description:
 
 @inset{@elemtag{sexpr?}
@@ -417,19 +421,29 @@ Now with one level of meta-recursion:
 @Interaction*[
 (map length (time (value `(,source-code ',fibonacci-code))))]
 
-The fibonacci-code is too complicated for meta-recursion of depth 2.
-Memory is not the problem. Time is.
-Trying meta-recursion at depth 2 with the @tt{fibonacci-code} would take hours of computation.
-Let's take a simpler expression:
+The last three lines are the @elemref["natural?"]{natural numbers} 0, 1 and 10.
+We use function @nbr[length] to convert @elemref["natural?"]{natural numbers}
+of the interpreter to @nbrl[exact-nonnegative-integer?]{those} of @(Rckt).
+First without meta-recursion:
 
-@inset{@tt{((@nbpr{lambda} (fun n) (fun (fun n))) @nbpr{add1} (()()()))}}
+@Interaction*[
+(map length
+ (time
+  (value fibonacci-code)))]
 
-@Interaction[
-(time
- (value
- `(,source-code
-  '(,source-code
-   '((lambda (fun n) (fun (fun n))) add1 (()()()))))))]
+Now with one level of meta-recursion:
+
+@Interaction*[
+(map length
+ (time
+  (value `(,source-code ',fibonacci-code))))]
+
+With two levels of meta-recursion:
+
+@Interaction*[
+(map length
+ (time
+  (value `(,source-code '(,source-code ',fibonacci-code)))))]
 
 No example of meta-recursion at depth 3. Takes too much time. For example:
 
