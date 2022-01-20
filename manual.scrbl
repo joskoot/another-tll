@@ -397,7 +397,7 @@ It is possible to use the interpreter meta-recursively. As an example:
      (Y3
       (lambda (fibo)
        (code:comment "Return a list of the first n+2 numbers of the")
-       (code:comment "fibonacci sequence starting with 0 and 1.")
+       (code:comment "fibonacci sequence starting with first and second.")
        (lambda (first second n)
         (cond
          ((zero? n) (cons first (cons second '())))
