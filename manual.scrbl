@@ -447,7 +447,11 @@ With two levels of meta-recursion:
 
 No example of meta-recursion at depth 3. Takes too much time. For example:
 
-@inset{@nbr[(value `(,source-code '(,source-code '(,source-code '(add1 (()()))))))]}
+@inset{@nbr[
+(value
+`(,source-code
+ '(,source-code
+  '(,source-code '(add1 (()()))))))]}
 
 took 20 minutes on my PC (AMD Ryzen 5 1500X Quad-core Processor, 3.50 GHz),@(lb)
 using DrRacket 8.3 bc, debugging off.
