@@ -287,7 +287,8 @@ Returns @nbr[#t] if @nbr[b] is @nbr[#f], returns @nbr[#f] in all other cases.}
 
 @section[#:tag "internal-representation"]{Internal representation}
 
-Within the interpreter macros and functions, both closures made by macro @nbpr{lambda} and primitive ones,
+Within the interpreter macros and functions,
+both closures made by macro @nbpr{lambda} and primitive ones,
 are represented by @elemref["sexpr?"]{sexprs}. For example:
 
 @Interaction[
@@ -369,7 +370,10 @@ Well, let's see with @nbr[print-graph] enabled:
   (print-as-expression #f))
  (string-length (~s |(value source-code)|)))]
 
-It appears that most parts are shared in a nested way.
+Run module @nbhll["checks.rkt"]{checks.rkt"} for a printout.
+Many parts in @nbr[(value source-code)] are shared and sharing may be nested.
+This is caused by the use of @nb{Y-combinators} in the @racket[source-code],
+which do a self-apply, doubling part of the code, possibly in a nested manner.
 Compare this with:
 
 @Interaction[(~r #:notation 'exponential (expt 2 (expt 2 (expt 2 (expt 2 2)))))]
