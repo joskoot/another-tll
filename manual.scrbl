@@ -149,7 +149,9 @@ but the @seclink["restrictions"]{restrictions} and style prevent their use.}}]
 @elemtag{quote}
 @defform-remove-empty-lines[@defform[#:kind "macro" (quote datum)
 #:grammar ((datum #,(italic (tt (elemref "sexpr?" "sexpr")))))]{
-Like in @(Rckt), but the @nbr[datum] is restricted to a @elemref["sexpr?"]{sexpr}.}]
+Like in @(Rckt).
+The @nbr[datum] should be a @elemref["sexpr?"]{sexpr},
+but macro @nbpr{quote} does not check this.}]
 
 @elemtag{cond}
 @defform-remove-empty-lines[
