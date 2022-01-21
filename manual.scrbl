@@ -74,7 +74,7 @@ Source code of procedure @nbr[value].
 Because the interpreter is meta-recursive, it can be applied to its own @nbr[source-code],
 but this must be done with some care such as not to print the result of
 @nbr[(value source-code)] without sharing enabled.
-This is explained in section section @seclink["meta-recursion"]{Meta-recursion}.}
+This is explained in section @seclink["meta-recursion"]{Meta-recursion}.}
 
 Predicate @nbpr{sexpr?} is not provided. It complies to the following description:
 
