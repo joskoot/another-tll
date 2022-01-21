@@ -3,6 +3,8 @@
 (require "interpreter.rkt")
 (provide sexpr?)
 
+(print-graph #t)
+
 (define (check-sexpr sexpr)
  (or
   (symbol? sexpr)
@@ -91,15 +93,34 @@
    (else (hash-set! h expr 0) 0)))
  (depth expr))
 
+(define (sexpr? obj)
+ (define h (make-hash))
+ (define (sexpr? obj)
+  (or (hash-ref h obj #f)
+   (and (hash-set! h obj #t)
+    (or (atom? obj) (and (pair? obj) (andmap sexpr? obj))))))
+ (sexpr? obj))
+
+(define (atom? obj)
+ (or
+  (symbol? obj)
+  (boolean? obj)
+  (null? obj)))
+
+(define |(value source-code)| (value source-code))
+(define nr-of-atoms-source (nr-of-atoms source-code))
+(define nr-of-atoms-value-source (nr-of-atoms |(value source-code)|))
+
 (newline)
 (printf "Is the source-code a sexpr? ~s~n" (check-sexpr source-code))
-(printf "Nr of atoms in source-code: ~s~n" (nr-of-atoms source-code))
+(printf "Is (value source-code) a sexpr? ~s~n" (sexpr? |(value source-code)|))
+(printf "Nr of atoms in source-code: ~s~n" nr-of-atoms-source)
 (printf "Nr of distinct atoms in source-code: ~s~n" (reduced-nr-of-atoms source-code))
-(printf "Nr of atoms in (value source-code): ~s~n" (nr-of-atoms (value source-code)))
-(printf "Nr of distinct atoms in (value source-code): ~s~n" (reduced-nr-of-atoms (value source-code)))
+(printf "Nr of atoms in (value source-code): ~s~n" nr-of-atoms-value-source)
+(printf "Nr of distinct atoms in (value source-code): ~s~n"
+ (reduced-nr-of-atoms |(value source-code)|))
 (printf "Depth source-code: ~s~n" (depth source-code))
-(printf "Depth (value source-code): ~s~n" (depth (value source-code)))
+(printf "Depth (value source-code): ~s~n" (depth |(value source-code)|))
 (printf "Free variables (+ macros): ~s~n" (free-vars source-code))
 (printf "~n(value source-code):~n~n")
-(display (format "~v" (value source-code)))
-
+(parameterize ((print-graph #t)) (~s |(value source-code)|))
