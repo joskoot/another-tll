@@ -1,6 +1,7 @@
 #lang racket
 
 (require "interpreter.rkt")
+(provide sexpr?)
 
 (define (check-sexpr sexpr)
  (or
