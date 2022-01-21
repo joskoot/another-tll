@@ -124,7 +124,7 @@
 
   ; Use a very impropable name for lambda-forms in the expansion of let*-forms.  
  
-    (*lambda-from-let* '‘‹a·lambda·symbol·used·for·almost·hygiene·in·macro·let*›’)
+    (*lambda-from-let* '|‘‹a·lambda·symbol used·for almost·hygiene in·macro·let*›’|)
     
     (initial-table
      (lambda (name)
@@ -256,7 +256,7 @@
          ((zero? m) #f)
          (#t (< (sub1 n) (sub1 m))))))))
 
-    (quotient
+    (quotient-help
      (Y2
       (lambda (quotient)
        (lambda (n m)
@@ -264,13 +264,25 @@
          ((< n m) zero)
          (#t (add1 (quotient (- n m) m))))))))
 
-    (remainder
+    (quotient
+     (lambda (n m)
+      (cond
+       ((zero? m) (wrong 'quotient 'division-by-zero))
+       (#t (quotient-help n m)))))
+
+    (remainder-help
      (Y2
       (lambda (remainder)
        (lambda (n m)
         (cond
          ((< n m) n)
          (#t (remainder (- n m) m)))))))
+
+    (remainder
+     (lambda (n m)
+      (cond
+       ((zero? m) (wrong 'remainder 'division-by-zero))
+       (#t (remainder-help n m)))))
 
     (not (lambda (b) (cond ((atom? b) (cond ((eq? b #f) #t) (#t #f))) (#t #f))))
 
@@ -406,3 +418,4 @@
 ;(sexpr? (value source-code))
 ;
 ;(time (value `(,source-code '(,source-code '((lambda (fun n) (fun (fun n))) add1 (()()()))))))
+;(value '(let* ((lambda add1)) (let* ((n (()()))) (lambda n))))

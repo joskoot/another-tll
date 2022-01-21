@@ -1,7 +1,6 @@
 #lang racket
 
 (require "interpreter.rkt")
-(provide sexpr?)
 
 (print-graph #t)
 
