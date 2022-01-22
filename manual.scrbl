@@ -385,6 +385,8 @@ Well, let's see with @nbr[print-graph] enabled:
  (string-length (~s value-of-source-code)))]
 
 Run module @nbhll["checks.rkt"]{checks.rkt} for a printout.
+(For example by entering @nbr[(require another-tll/checks)]
+in the interaction window of @(Rckt))
 Many parts in @nbr[(value source-code)] are shared and sharing may be nested.
 This is caused by the use of @nb{Y-combinators} in the @racket[source-code],
 which do a self-apply, doubling part of the code, possibly in a nested manner.
