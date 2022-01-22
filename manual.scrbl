@@ -1,6 +1,6 @@
 #lang scribble/manual
 
-@(printf "The installation of the pavkage may take some minutes.~n")
+@(printf "~nThe installation of the package may take some minutes.~n~n")
 @(flush-output)
 
 @(require
@@ -436,23 +436,6 @@ Now with one level of meta-recursion:
 
 @Interaction*[
 (map length (time (value `(,source-code ',fibonacci-code))))]
-
-The last three lines are the @elemref["natural?"]{natural numbers} 0, 1 and 10.
-We use function @nbr[length] to convert @elemref["natural?"]{natural numbers}
-of the interpreter to @nbrl[exact-nonnegative-integer?]{those} of @(Rckt).
-First without meta-recursion:
-
-@Interaction*[
-(map length
- (time
-  (value fibonacci-code)))]
-
-Now with one level of meta-recursion:
-
-@Interaction*[
-(map length
- (time
-  (value `(,source-code ',fibonacci-code))))]
 
 With two levels of meta-recursion:
 
