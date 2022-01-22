@@ -53,7 +53,7 @@ Submodule @tt{restrictions} provides restricted versions of the following macros
 The @nbr[source-code] in submodule @tt{interpreter}
 is restricted to these macros and functions.
 Because the interpreter is intended to be meta-recursive,
-it implements these macros and functions and adds a few more functions.
+it implements these macros and functions and adds a few more functions and macros.
 The interpreter is exported in two forms:
 
 @inset{@Tabular[
