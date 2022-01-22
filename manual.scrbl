@@ -1,5 +1,8 @@
 #lang scribble/manual
 
+@(printf "The installation of the pavkage may take some minutes.~n")
+@(flush-output)
+
 @(require
   (except-in racket natural?)
   "interpreter.rkt"
