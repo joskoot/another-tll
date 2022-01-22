@@ -274,12 +274,20 @@ Error when @nbr[m] is @nbpr{zero}.}
 
 @section{Other predicates and functions.}
 
-In addition the interpreter implements the following predicate and functions.
+In addition the interpreter implements the following predicate, macros and functions.
 
 @;@elemtag{boolean?}
 @defproc[#:kind "predicate" (boolean? (obj #,(nbpr "sexpr?"))) boolean?]{
 @nbr[#t] if the @nbr[obj] is a @nber["boolean?"]{boolean},
 else @nbr[#f]}
+
+@defform[#:kind "macro" (or q ...)]{
+Same as in @(Rckt). If all but the last @nbr[q] are @nbr[#f],
+the last @nbr[q] is evaluated in tail position.}
+
+@defform[#:kind "macro" (and q ...)]{
+Same as in @(Rckt). If none of the @nbr[q]s preceding the last one is @nbr[#f],
+the last @nbr[q] is evaluated in tail position.}
 
 @elemtag{list}
 @Defproc[(list (element #,(nbpr "sexpr?")) ...) (listof #,(nbpr "sexpr?"))]{

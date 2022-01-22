@@ -135,6 +135,8 @@
        ((eq? name (quote cond  ))    (build2 (quote macro) name))
        ((eq? name (quote let*  ))    (build2 (quote macro) name))
        ((eq? name (quote value ))    (build2 (quote macro) name))
+       ((eq? name (quote or    ))    (build2 (quote macro) name))
+       ((eq? name (quote and   ))    (build2 (quote macro) name))
        ((eq? name (quote zero  ))    (quote ()))
        (#t (build2 (quote primitive) name)))))
 
@@ -355,14 +357,52 @@
           (lambda (closure vals)
            (meaning (caddr closure) (cons (build2 (cadr closure) vals) (car closure)))))
 
+         (*or-help
+          (lambda (element or rest table)
+           (cond
+            ((atom? element)
+             (cond
+              ((eq? element #f) (or rest table))
+              (#t element)))
+            (#t element))))
+
+         (*or
+          (Y2
+           (lambda (or)
+            (lambda (e table)
+             (cond
+              ((null? e) #f)
+              ((null? (cdr e)) (meaning (car e) table))
+              (#t (*or-help (meaning (car e) table) or (cdr e) table)))))))
+
+         (*and-help
+          (lambda (element and rest table)
+           (cond
+            ((atom? element)
+             (cond
+              ((eq? element #f) #f)
+              (#t (and rest table))))
+            (#t (and rest table)))))
+
+         (*and
+          (Y2
+           (lambda (and)
+            (lambda (e table)
+             (cond
+              ((null? e) #t)
+              ((null? (cdr e)) (meaning (car e) table))
+              (#t (*and-help (meaning (car e) table) and (cdr e) table)))))))
+
          (apply-macro
           (lambda (name args table)
            (cond
             ((eq? name (quote lambda)) (*lambda args table))
-            ((eq? name (quote quote)) (*quote args table))
-            ((eq? name (quote cond)) (*cond args table))
-            ((eq? name (quote let*)) (*let* args table))
-            ((eq? name (quote value)) (meaning (meaning (car args) table) (quote ()))))))
+            ((eq? name (quote quote )) (*quote  args table))
+            ((eq? name (quote cond  )) (*cond   args table))
+            ((eq? name (quote let*  )) (*let*   args table))
+            ((eq? name (quote or    )) (*or     args table))
+            ((eq? name (quote and   )) (*and    args table))
+            ((eq? name (quote value )) (meaning (meaning (car args) table) (quote ()))))))
 
          (apply-operator
           (lambda (operator args table)
