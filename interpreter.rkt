@@ -71,11 +71,11 @@
   (unless (list? x) (raise-argument-error (Quote null?) "list?" x))
   (Null? x))
 
- (define (atom? x) 
-  (Cond
-   ((or (Null? x) (Boolean? x) (Symbol? x)))
-   ((list? x) #f)
-   (else (error (Quote sexpr) "unaccepted element: ~s" x))))
+ (define (atom? obj)
+  (or
+   (symbol? obj)
+   (boolean? obj)
+   (null? obj)))
 
  (define (wrong why what) (error (format "~s" why) what))
 
