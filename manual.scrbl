@@ -167,9 +167,7 @@ Like in @(Rckt), but with the restriction that each @nbr[test] must yield a
 
 @defproc[#:kind "predicate" (atom? (obj #,(nbpr "sexpr?"))) boolean?]{
 Returns @nbr[#t] if and only if the @nbr[obj] is a @nbrl[symbol?]{symbol},
-a @nbrl[boolean?]{boolean} or the empty list.
-Returns @nbr[#f] if the @nbr[obj] is a @elemref["sexpr?"]{sexpr} but not an @elemref["atom?"]{atom}.
-Raises an exception if the @nbr[obj] is not a @elemref["sexpr?"]{sexpr}.}
+a @nbrl[boolean?]{boolean} or the empty list, else returns @nbr[#f].}
 
 @elemtag{car}
 @Defproc[(car (lst list?)) #,(nbpr "sexpr?")]{
