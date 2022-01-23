@@ -70,12 +70,8 @@
  (define (null? x)
   (unless (list? x) (raise-argument-error (Quote null?) "list?" x))
   (Null? x))
-
- (define (atom? obj)
-  (or
-   (symbol? obj)
-   (boolean? obj)
-   (null? obj)))
+ 
+ (define (atom? x) (or (Null? x) (Boolean? x) (Symbol? x)))
 
  (define (wrong why what) (error (format "~s" why) what))
 
