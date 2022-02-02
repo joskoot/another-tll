@@ -209,7 +209,8 @@ Hence available for the user too.}
 
 @section[#:tag "Natural-numbers"]{Natural numbers}
 
-@elemref["natural?"]{Natural numbers} are represented by lists of @nbr[null]:
+@elemref["natural?"]{Natural numbers} are self-evaluating.
+They are represented by lists of @nbr[null]:
 
 @inset{@Tabular[
 (("decimal notation" "represented by")
