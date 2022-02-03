@@ -65,7 +65,7 @@ The interpreter is exported in two forms:
  #:sep (hspace 1)]}
 
 @Defproc[(value (sexpr #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{
-The function can be called both from @[Rckt] and from the interprter itself.
+The function can be called both from @[Rckt] and from the interpreter itself.
 Both @(Rckt) and the interpreter call functions by value.
 Therefore function @nbr[value] receives the evaluated argument @nbr[sexpr].
 It evaluates the received value in its own top environment.
