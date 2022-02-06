@@ -457,4 +457,13 @@ took 20 minutes on my PC (AMD Ryzen 5 1500X Quad-core Processor, 3.50 GHz),@(lb)
 using DrRacket 8.3 bc, debugging off.
 More examples in file @nbhll["examples.rkt"]{examples.rkt}.
 
+The meta-recursivity holds for right associative nesting only, as in
+
+@inset{@nbr[(value `(,source-code '(,source-code ',fibonacci-code)))]}
+
+However left association does not work because @nbr[(value source-code)]
+is a @elemref["sexpr?"]{sexpr}, not a procedure in the sense of @(Rckt):
+
+@Interaction[(procedure? (value source-code))]
+
 @(larger (larger (bold "The end")))
