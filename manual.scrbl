@@ -280,7 +280,7 @@ Error when @nbr[m] is @nbpr{zero}.}
 
 In addition the interpreter implements the following predicate, macros and functions.
 
-@;@elemtag{boolean?}
+@elemtag{boolean?}
 @defproc[#:kind "predicate" (boolean? (obj #,(nbpr "sexpr?"))) boolean?]{
 @nbr[#t] if the @nbr[obj] is a @nber["boolean?"]{boolean},
 else @nbr[#f]}
