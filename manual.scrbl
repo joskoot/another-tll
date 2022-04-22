@@ -346,13 +346,21 @@ too big to be shown here. It also is too big for function @nbpr{sexpr?}.
 A better definition is:
 
 @Interaction*[
-(define (sexpr? obj)
- (define h (make-hash))
- (define (sexpr? obj)
-  (or (hash-ref h obj #f)
-   (and (hash-set! h obj #t)
-    (or (atom? obj) (and (pair? obj) (andmap sexpr? obj))))))
- (sexpr? obj))]
+(define (sexpr? x)
+ (define hash (make-hasheq))
+ (define (sexpr? x)
+  (cond
+   ((pair? x)
+    (case (hash-ref hash x 'not-yet-visited)
+     [(not-yet-visited)
+      (hash-set! hash x 'visiting)
+      (and (sexpr? (car x)) (sexpr? (cdr x))
+       (hash-set! hash x 'visited)
+       #t)]
+     [(visiting) #f]
+     [(visited) #t]))
+    [else (atom? x)]))
+ (sexpr? x))]
 
 @Interaction*[
 (define value-of-source-code (value source-code))
@@ -375,9 +383,7 @@ Using a hash it is possible to count the flattened length of @nbr[(value source-
  (nr-of-atoms x))]
 
 @Interaction*[
-(display
- (~r #:notation 'exponential
-  (nr-of-atoms value-of-source-code)))]
+(nr-of-atoms value-of-source-code)]
 
 How is it possible that @tt{value-of-source-code} fits in memory?@(lb)
 Well, let's see with @nbr[print-graph] enabled:
