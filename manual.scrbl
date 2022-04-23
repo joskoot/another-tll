@@ -261,12 +261,14 @@ Within the @nbr[source-code] implemented without using function @nbr[append].}
 Product of @nbr[n] and @nbr[m].}
 
 @elemtag{quotient}
-@Defproc[(quotient (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "natural?")]{
+@Defproc[(quotient (n #,(nbpr "natural?")) (m (and/c #,(nbpr "natural?") (not/c #,(nbpr "zero?")))))
+         #,(nbpr "natural?")]{
 Greatest @elemref["natural?"]{natural number} not greater than @nbr[n]/@nbr[m].
 Error when @nbr[m] is @nbpr{zero}.}
 
 @elemtag{remainder}
-@Defproc[(remainder (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) #,(nbpr "natural?")]{
+@Defproc[(remainder (n #,(nbpr "natural?")) (m (and/c #,(nbpr "natural?") (not/c #,(nbpr "zero?")))))
+         #,(nbpr "natural?")]{
 Same as @nbr[(- n (* m (#,(nbpr "quotient") n m)))], but computed without computing the quotient.
 Error when @nbr[m] is @nbpr{zero}.}
 
