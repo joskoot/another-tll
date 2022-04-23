@@ -278,7 +278,7 @@ Error when @nbr[m] is @nbpr{zero}.}
 @elemtag{<}
 @defproc[#:kind "relation" (< (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) boolean?]
 
-@section{Other predicates and functions.}
+@section{More functions and macros.}
 
 In addition the interpreter implements the following predicate, macros and functions.
 
@@ -385,7 +385,7 @@ Using a hash it is possible to count the flattened length of @nbr[(value source-
  (nr-of-atoms x))]
 
 @Interaction*[
-(nr-of-atoms value-of-source-code)]
+(time (nr-of-atoms value-of-source-code))]
 
 How is it possible that @tt{value-of-source-code} fits in memory?@(lb)
 Well, let's see with @nbr[print-graph] enabled:
