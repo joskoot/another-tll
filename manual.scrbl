@@ -299,7 +299,7 @@ the last @nbr[q] is evaluated in tail position.}
 @Defproc[(list (element #,(nbpr "sexpr?")) ...) (listof #,(nbpr "sexpr?"))]{
 Same as in @(Rckt), but every element must be a @elemref["sexpr?"]{sexpr}.
 This is the one and only function in the interpreter accepting an arbitrary number of arguments.
-It is implemented with functions of fixed arity only, though.}
+It is implemented with functions of fixed numbers of arguments only, though.}
 
 @elemtag{not}
 @Defproc[(not (b #,(nbpr "sexpr?"))) boolean?]{
