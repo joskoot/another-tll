@@ -378,8 +378,10 @@ Using a hash it is possible to count the flattened length of @nbr[(value source-
  (define (nr-of-atoms x)
   (let ((n (hash-ref hash x #f)))
    (cond
+    ((eq? n 'visiting) +inf.0)
     (n)
     ((list? x)
+     (hash-set! hash x 'visiting)
      (let ((n (apply + (map nr-of-atoms x))))
       (hash-set! hash x n) n))
     (else (hash-set! hash x 1) 1))))
