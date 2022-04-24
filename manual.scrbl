@@ -122,7 +122,7 @@ See section @seclink["internal-representation"]{Internal representation}.
 @elemtag{lambda}
 @defform-remove-empty-lines[@defform[#:kind "macro" (lambda (formal-argument ...+) body)
 #:grammar
-((formal-argument #,(italic (tt (nbrl symbol? "identifier"))))
+((formal-argument #,(italic (tt (nbrl symbol? "symbol"))))
  (body #,(italic (tt (elemref "sexpr?" "sexpr")))))]{
 At least one @nbr[formal-argument] required and the @nbr[body] must consist of one
 @elemref["sexpr?"]{sexpr} only. @nb{No optional} or keyword arguments,
@@ -131,7 +131,7 @@ neither a rest-argument .}]
 @elemtag{let*}
 @defform-remove-empty-lines[@defform[#:kind "macro" (let* ((var expr) ...) body)
 #:grammar
-((var #,(italic (tt (nbrl symbol? "identifier"))))
+((var #,(italic (tt (nbrl symbol? "symbol"))))
  (expr #,(italic (tt (elemref "sexpr?" "sexpr"))))
  (body #,(italic (tt (elemref "sexpr?" "sexpr")))))]{
 Like in @(Rckt) but restricted to a @nbr[body] of one @elemref["sexpr?"]{sexpr} only.
