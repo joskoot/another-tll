@@ -98,8 +98,9 @@ Predicate @nbpr{sexpr?} is not provided. It complies to the following descriptio
   (boolean? obj)
   (null? obj)))]}
 
-The above definition of @nbpr{sexpr?} can be very slow for big and deeply nested expressions.
-@nb{A better} definition can be found in section @seclink["meta-recursion"]{Meta-recursion}.
+The above implementation of @nbpr{sexpr?} can be very slow for big and deeply nested expressions.
+Moreover, it loops on cyclic lists in stead of rejecting them.
+@nb{A better} implementation can be found in section @seclink["meta-recursion"]{Meta-recursion}.
 
 A @elemref["sexpr?"]{sexpr} must not contain numbers written with digits.
 The interpreter implements functions for natural numbers only and
