@@ -24,18 +24,28 @@
 
  (define-syntax (quote stx)
   (define (sexpr? x)
-   (define h (make-hash))
+   (define hash (make-hasheq))
    (define (sexpr? x)
+    (cond
+     ((pair? x)
+      (case (hash-ref hash x 'not-yet-visited)
+       ((not-yet-visited)
+        (hash-set! hash x 'visiting)
+        (and (sexpr? (car x)) (sexpr? (cdr x))
+         (hash-set! hash x 'visited)
+         #t))
+       ((visiting) #f)
+       ((visited) #t)))
+      (else (atom? x))))
+   (define (atom? x)
     (or
-     (begin0 (hash-ref h x #f) (hash-set! h x #t))
-     (null? x)
-     (boolean? x)
      (symbol? x)
-     (and (list? x) (andmap sexpr? x))))
+     (boolean? x)
+     (null? x)))
    (sexpr? x))
   (syntax-case stx ()
    ((_ datum) (sexpr? (syntax->datum #'datum)) #'(Quote datum))
-   ((_ not-a-sexpr) (raise-syntax-error (Quote quote) "sexpr expected, given: ~s" #'not-a-sexpr))))
+   ((_ not-a-sexpr) (raise-syntax-error (Quote quote) "sexpr expected, given:" #'not-a-sexpr))))
 
  (define-syntax (cond stx)
   (syntax-case stx ()
@@ -282,33 +292,48 @@
        ((zero? m) (wrong 'remainder 'division-by-zero))
        (#t (remainder-help n m)))))
 
+    (quotient/remainder-help
+     (Y3
+      (lambda (quotient/remainder)
+       (lambda (n m q)
+        (cond
+         ((< n m) (build2 q n))
+         (#t (quotient/remainder (- n m) m (add1 q))))))))
+
+    (quotient/remainder
+     (lambda (n m)
+      (cond
+       ((zero? m) (wrong 'quotient/remainder  'division-by-zero))
+       (#t (quotient/remainder-help n m '())))))
+    
     (not (lambda (b) (cond ((atom? b) (cond ((eq? b #f) #t) (#t #f))) (#t #f))))
 
     (apply-primitive
      (lambda (name vals)
       (cond
-       ((eq? name (quote car      )) (car       (car vals)))
-       ((eq? name (quote cdr      )) (cdr       (car vals)))
-       ((eq? name (quote cons     )) (cons      (car vals) (cadr vals)))
-       ((eq? name (quote eq?      )) (eq?       (car vals) (cadr vals)))
-       ((eq? name (quote null?    )) (null?     (car vals)))
-       ((eq? name (quote atom?    )) (atom?     (car vals)))
-       ((eq? name (quote natural? )) (natural?  (car vals)))
-       ((eq? name (quote zero?    )) (zero?     (car vals)))
-       ((eq? name (quote boolean? )) (boolean?  (car vals)))
-       ((eq? name (quote list     ))                 vals)
-       ((eq? name (quote add1     )) (add1      (car vals)))
-       ((eq? name (quote sub1     )) (sub1      (car vals)))
-       ((eq? name (quote show     )) (show      (car vals) (cadr vals)))
-       ((eq? name (quote +        )) (+         (car vals) (cadr vals)))
-       ((eq? name (quote *        )) (*         (car vals) (cadr vals)))
-       ((eq? name (quote -        )) (-         (car vals) (cadr vals)))
-       ((eq? name (quote =        )) (=         (car vals) (cadr vals)))
-       ((eq? name (quote <        )) (<         (car vals) (cadr vals)))
-       ((eq? name (quote remainder)) (remainder (car vals) (cadr vals)))
-       ((eq? name (quote quotient )) (quotient  (car vals) (cadr vals)))
-       ((eq? name (quote not      )) (not       (car vals)))
-       ((eq? name (quote wrong    )) (wrong     (car vals) (cadr vals)))
+       ((eq? name (quote car               )) (car                (car vals)))
+       ((eq? name (quote cdr               )) (cdr                (car vals)))
+       ((eq? name (quote cons              )) (cons               (car vals) (cadr vals)))
+       ((eq? name (quote eq?               )) (eq?                (car vals) (cadr vals)))
+       ((eq? name (quote null?             )) (null?              (car vals)))
+       ((eq? name (quote atom?             )) (atom?              (car vals)))
+       ((eq? name (quote natural?          )) (natural?           (car vals)))
+       ((eq? name (quote zero?             )) (zero?              (car vals)))
+       ((eq? name (quote boolean?          )) (boolean?           (car vals)))
+       ((eq? name (quote list              ))                 vals)
+       ((eq? name (quote add1              )) (add1               (car vals)))
+       ((eq? name (quote sub1              )) (sub1               (car vals)))
+       ((eq? name (quote show              )) (show               (car vals) (cadr vals)))
+       ((eq? name (quote +                 )) (+                  (car vals) (cadr vals)))
+       ((eq? name (quote *                 )) (*                  (car vals) (cadr vals)))
+       ((eq? name (quote -                 )) (-                  (car vals) (cadr vals)))
+       ((eq? name (quote =                 )) (=                  (car vals) (cadr vals)))
+       ((eq? name (quote <                 )) (<                  (car vals) (cadr vals)))
+       ((eq? name (quote remainder         )) (remainder          (car vals) (cadr vals)))
+       ((eq? name (quote quotient          )) (quotient           (car vals) (cadr vals)))
+       ((eq? name (quote quotient/remainder)) (quotient/remainder (car vals) (cadr vals)))
+       ((eq? name (quote not               )) (not                (car vals)))
+       ((eq? name (quote wrong             )) (wrong              (car vals) (cadr vals)))
        (#t (wrong (quote unbound-var) name)))))
 
     (atom-to-action
@@ -455,3 +480,43 @@
 ;
 ;(time (value `(,source-code '(,source-code '((lambda (fun n) (fun (fun n))) add1 (()()()))))))
 ;(value '(let* ((lambda add1)) (let* ((n (()()))) (lambda n))))
+
+
+;(define (trafo x)
+; (cond
+;  ((natural? x) (make-list x '()))
+;  ((list? x) (map trafo x))
+;  (else x)))
+;
+;(value
+; (trafo
+; '(let*
+;   ((self-apply (lambda (f) (f f)))
+;    (Y1 (lambda (g) (self-apply (lambda (f) (g (lambda (x  ) ((f f) x  )))))))
+;    (Y2 (lambda (g) (self-apply (lambda (f) (g (lambda (x y) ((f f) x y)))))))
+;    (cadr (lambda (x) (car (cdr x))))
+;    (build2 (lambda (x y) (cons x (cons y '()))))
+;    (even?+odd?
+;     (Y1
+;      (lambda (even?+odd?)
+;       (lambda (selector)
+;        (selector
+;         ((lambda (even? odd?)
+;           (build2
+;            (lambda (n) (cond ((zero? n) #t) (#t (odd? (sub1 n)))))
+;            (lambda (n) (cond ((zero? n) #f) (#t (even? (sub1 n)))))))
+;          (lambda (n) ((even?+odd? car) n))
+;          (lambda (n) ((even?+odd? cadr) n))))))))
+;    (even? (even?+odd? car))
+;    (odd? (even?+odd? cadr))
+;    (map
+;     (Y2
+;      (lambda (map)
+;       (lambda (proc lst)
+;        (cond
+;         ((null? lst) '())
+;         (#t (cons (proc (car lst)) (map proc (cdr lst))))))))))
+;   (list (map even? '(0 1 2 3 4)) (map odd? '(0 1 2 3 4))))))
+;
+;
+;

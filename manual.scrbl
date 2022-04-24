@@ -355,14 +355,14 @@ A better definition is:
   (cond
    ((pair? x)
     (case (hash-ref hash x 'not-yet-visited)
-     [(not-yet-visited)
+     ((not-yet-visited)
       (hash-set! hash x 'visiting)
       (and (sexpr? (car x)) (sexpr? (cdr x))
        (hash-set! hash x 'visited)
-       #t)]
-     [(visiting) #f]
-     [(visited) #t]))
-    [else (atom? x)]))
+       #t))
+     ((visiting) #f)
+     ((visited) #t)))
+    (else (atom? x))))
  (sexpr? x))]
 
 @Interaction*[
