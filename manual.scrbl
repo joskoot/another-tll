@@ -16,20 +16,6 @@
   (for-syntax
    (except-in racket set natural?)))
 
-@(define (nr-of-atoms x)
- (define hash (make-hash))
- (define (nr-of-atoms x)
-  (let ((n (hash-ref hash x #f)))
-   (cond
-    (n)
-    ((list? x) (let ((n (apply + (map nr-of-atoms x)))) (hash-set! hash x n) n))
-    (else (hash-set! hash x 1) 1))))
- (nr-of-atoms x))
-
-@(define nr-of-atoms-value-source (nr-of-atoms (value source-code)))
-
-@(define nr-of-atoms-value-source-str (~r #:notation 'exponential nr-of-atoms-value-source))
-
 @title[#:version ""]{Meta-recursive interpreter@(lb)inspired by The Little LISPer}
 @author{Jacob J. A. Koot}
 
@@ -56,7 +42,7 @@ Submodule @tt{restrictions} provides restricted versions of the following macros
 The @nbr[source-code] in submodule @tt{interpreter}
 is restricted to these macros and functions.
 Because the interpreter is intended to be meta-recursive,
-it implements these macros and functions and adds a few more functions and macros.
+it implements these macros and functions and adds a few more.
 The interpreter is exported in two forms:
 
 @inset{@Tabular[
@@ -173,11 +159,11 @@ Returns @nbr[#t] if and only if the @nbr[obj] is a @nbrl[symbol?]{symbol},
 a @nbrl[boolean?]{boolean} or the empty list, else returns @nbr[#f].}
 
 @elemtag{car}
-@Defproc[(car (lst list?)) #,(nbpr "sexpr?")]{
+@Defproc[(car (lst (non-empty-listof sexpr?))) #,(nbpr "sexpr?")]{
 Like in @(Rckt), but restricted to proper lists. @nb{(First law of @(tll))}}
 
 @elemtag{cdr}
-@Defproc[(cdr (lst list?)) #,(nbpr "sexpr?")]{
+@Defproc[(cdr (lst (non-empty-listof sexpr))) list?]{
 Like in @(Rckt), but restricted to proper lists. @nb{(Second law of @(tll))}}
 
 @elemtag{cons}
@@ -370,39 +356,43 @@ A better definition is:
 (time (sexpr? value-of-source-code))]
 
 The times are in milliseconds.@(lb)
-Using a hash it is possible to count the flattened length of @nbr[(value source-code)]:
+Using a hash it is possible to count the flattened length of @nbr[(value source-code)].
+@nb{We already} know that @tt{value-of-source-code} has no cycles and therefore have no need to
+check subexpressions not already being visited while counting.                         
 
 @Interaction*[
-(define (nr-of-atoms x)
+(define (flattened-length x)
  (define hash (make-hash))
- (define (nr-of-atoms x)
+ (define (flattened-length x)
   (let ((n (hash-ref hash x #f)))
    (cond
-    ((eq? n 'visiting) +inf.0)
     (n)
     ((list? x)
-     (hash-set! hash x 'visiting)
-     (let ((n (apply + (map nr-of-atoms x))))
+     (let ((n (apply + (map flattened-length x))))
       (hash-set! hash x n) n))
     (else (hash-set! hash x 1) 1))))
- (nr-of-atoms x))]
+ (flattened-length x))]
 
 @Interaction*[
-(time (nr-of-atoms value-of-source-code))]
+(time (flattened-length value-of-source-code))]
 
 How is it possible that @tt{value-of-source-code} fits in memory?@(lb)
-Well, let's see with @nbr[print-graph] enabled:
+Well, let's count the number of distinct pairs:
 
 @Interaction*[
-(parameterize
- ((print-graph #t)
-  (print-as-expression #f))
- (string-length (~s value-of-source-code)))]
+(define (nr-of-distinct-pairs x)
+ (define hash (make-hash))
+ (define (nr-of-distinct-pairs x)
+  (cond
+   ((hash-ref hash x #f) 0)
+   ((pair? x)
+    (hash-set! hash x #t)
+    (add1 (apply + (map nr-of-distinct-pairs x))))
+   (else 0)))
+ (nr-of-distinct-pairs x))
 
-Run module @nbhll["checks.rkt"]{checks.rkt} for a printout,
-for example by entering:
-@inset{@nbr[(require another-tll/checks)]}
-in the interaction window of @(Rckt).
+(time (nr-of-distinct-pairs value-of-source-code))]
+
 Many parts in @nbr[(value source-code)] are shared and sharing may be nested.
 This is caused by the use of @nb{Y-combinators} in the @racket[source-code],
 which do a self-apply, doubling part of the code, possibly in a nested manner.
