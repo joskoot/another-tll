@@ -56,7 +56,7 @@ The function can be called both from @[Rckt] and from the interpreter itself.
 Both @(Rckt) and the interpreter call functions by value.
 Therefore function @nbr[value] receives the evaluated argument.
 It evaluates the received value in its own top environment.
-Usually one will call the interpreter with quoted argument, for example.
+@nb{Usually one} will call the interpreter with quoted argument, for example.
 
 @inset{
 @Interaction[(value (quote (cons 'a '(b c))))]}
