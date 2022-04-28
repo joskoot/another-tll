@@ -54,12 +54,17 @@ The interpreter is exported in two shapes:
 @Defproc[(value (sexpr #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{
 The function can be called both from @[Rckt] and from the interpreter itself.
 Both @(Rckt) and the interpreter call functions by value.
-Therefore function @nbr[value] receives the evaluated argument @nbr[sexpr].
+Therefore function @nbr[value] receives the evaluated argument.
 It evaluates the received value in its own top environment.
 Usually one will call the interpreter with quoted argument, for example.
 
 @inset{
-@Interaction[(value (quote (cons 'a '(b c))))]}}
+@Interaction[(value (quote (cons 'a '(b c))))]}
+
+Nevertheless any argument yielding a @nber["sexpr?"]{sexpr} will do, for example:
+
+@inset{
+@Interaction[(value (read (open-input-string "(cons 'a '(b c))")))]}}
 
 @defthing[source-code #,(nbpr "sexpr?")]{
 Source code of procedure @nbr[value].
