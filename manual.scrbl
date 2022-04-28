@@ -36,14 +36,15 @@ by Danial P. Friedman and Matthias Felleisen
 
 Well, I do bother and therefore I'm giving it a shot in the form of two submodules in file
 @nbhll["interpreter.rkt"]{interpreter.rkt}. 
-Submodule @tt{restrictions} provides restricted versions of the following macros and functions:
+Submodule @tt{restrictions} provides restricted versions of the following syntactic forms and
+functions:
 @nbpr{lambda}, @nbpr{let*}, @nbpr{quote}, @nbpr{cond}, @nbpr{atom?}, @nbpr{car}, @nbpr{cdr},
 @nbpr{cons}, @nbpr{eq?}, @nbpr{null?},  @nbpr{show} and @nbpr{wrong}.
 The @nbr[source-code] in submodule @tt{interpreter}
-is restricted to these macros and functions.
+is restricted to these syntactic forms and functions.
 Because the interpreter is intended to be meta-recursive,
-it implements these macros and functions and adds a few more.
-The interpreter is exported in two forms:
+it implements these forms and functions and adds a few more.
+The interpreter is exported in two shapes:
 
 @inset{@Tabular[
 ((@(nbr value) ":" @(nbr (-> #,(nbpr "sexpr?") #,(nbpr "sexpr?"))) "the interpreter proper.")
@@ -95,29 +96,30 @@ uses a representation in terms of lists of @nbr[null].
 
 @section[#:tag "restrictions"]{Restrictions}
 
-The @nbr[source-code] is written in a very small subset of @(Rckt). The macros and functions are
+The @nbr[source-code] is written in a very small subset of @(Rckt).
+The syntactic forms and functions are
 @nbpr{lambda}, @nbpr{let*}, @nbpr{quote}, @nbpr{cond}, @nbpr{atom?}, @nbpr{car}, @nbpr{cdr},
 @nbpr{cons}, @nbpr{eq?} and @nbpr{null?}. They are restricted as described below.
 Two procedures are added: @nbpr{show} and @nbpr{wrong}.
 The restrictions include those of the inside of the back cover of @(tll).
-They also restrict macros @nbpr{lambda} and @nbpr{cond} according to the style of @(tll).
+They also restrict @nbpr{lambda}- and @nbpr{cond}-forms according to the style of @(tll).
 This style also implies that every object is represented by a @elemref["sexpr?"]{sexpr},
-functions and macros included.
+functions and syntactic forms included.
 See section @seclink["internal-representation"]{Internal representation}.
 
 @elemtag{lambda}
-@defform-remove-empty-lines[@defform[#:kind "macro" (lambda (formal-argument ...+) body)
+@defform-remove-empty-lines[@Defform[(lambda (formal-argument ...+) body)
 #:grammar
-((formal-argument #,(italic (tt (nbrl symbol? "symbol"))))
+((formal-argument id)
  (body #,(italic (tt (elemref "sexpr?" "sexpr")))))]{
 At least one @nbr[formal-argument] required and the @nbr[body] must consist of one
 @elemref["sexpr?"]{sexpr} only. @nb{No optional} or keyword arguments,
 neither a rest-argument .}]
 
 @elemtag{let*}
-@defform-remove-empty-lines[@defform[#:kind "macro" (let* ((var expr) ...) body)
+@defform-remove-empty-lines[@Defform[(let* ((var expr) ...) body)
 #:grammar
-((var #,(italic (tt (nbrl symbol? "symbol"))))
+((var id)
  (expr #,(italic (tt (elemref "sexpr?" "sexpr"))))
  (body #,(italic (tt (elemref "sexpr?" "sexpr")))))]{
 Like in @(Rckt) but restricted to a @nbr[body] of one @elemref["sexpr?"]{sexpr} only.
@@ -127,34 +129,34 @@ it implements @nbpr{let*} too.
 The interpreter expands a @nbpr{let*}-form to a nest of @nbpr{lambda}-forms
 and evaluates the expanded form.
 The expansion is (almost) hygienic.
-Rebinding @tt{lambda} does not confuse macro @nbpr{let*}, for example:
+Rebinding @tt{lambda} does not confuse a @nbpr{let*}-form, for example:
 
 @Interaction[
 (value '(let* ((lambda add1)) (let* ((n (()()))) (lambda n))))]
 
-@note{In the expansion, macro @nbpr{let*} uses an alternative identifier for macro @nbpr{lambda}.
+@note{In the expansion, a @nbpr{let*}-form uses an alternative identifier forform @nbpr{lambda}-forms.
 It is very impropable that this identifier will occur in a @elemref["sexpr?"]{sexpr}
 given by the user to function @nbr[value].
 There are more sophisticated means to enhance hygiene,
 but the @seclink["restrictions"]{restrictions} and style prevent their use.}}]
 
 @elemtag{quote}
-@defform-remove-empty-lines[@defform[#:kind "macro" (quote datum)
+@defform-remove-empty-lines[@Defform[(quote datum)
 #:grammar ((datum #,(italic (tt (elemref "sexpr?" "sexpr")))))]{
 Like in @(Rckt).
 The @nbr[datum] should be a @elemref["sexpr?"]{sexpr},
-but macro @nbpr{quote} does not check this.}]
+but form @nbpr{quote} does not check this.}]
 
 @elemtag{cond}
 @defform-remove-empty-lines[
-@defform[#:kind "macro" (cond ((test expr) ...+))
+@Defform[(cond ((test expr) ...+))
 #:grammar
 ((test #,(italic (tt (elemref "sexpr?" "sexpr"))))
  (expr #,(italic (tt (elemref "sexpr?" "sexpr")))))]{
 Like in @(Rckt), but with the restriction that each @nbr[test] must yield a
 @nbrl[boolean?]{boolean} and at least one @nbr[test] must succeed.}]
 
-@defproc[#:kind "predicate" (atom? (obj #,(nbpr "sexpr?"))) boolean?]{
+@Defpred[(atom? (obj #,(nbpr "sexpr?"))) boolean?]{
 Returns @nbr[#t] if and only if the @nbr[obj] is a @nbrl[symbol?]{symbol},
 a @nbrl[boolean?]{boolean} or the empty list, else returns @nbr[#f].}
 
@@ -172,7 +174,7 @@ Like in @(Rckt), but @nbr[kdr] must be a proper list, which may be empty.
 @nb{(Third law of @(tll))}}
 
 @elemtag{null?}
-@defproc[#:kind "predicate" (null? (obj (listof #,(nbpr "sexpr?")))) boolean?]{
+@Defpred[(null? (obj (listof #,(nbpr "sexpr?")))) boolean?]{
 Like in @(Rckt), but restricted to lists. @nb{(Fourth law of @(tll))}}
 
 @elemtag{eq?}
@@ -212,14 +214,16 @@ They are represented by lists of @nbr[null]:
 #:column-properties '(center left)
 #:row-properties '((top-border bottom-border) () () () () 'bottom-border)]}
 
-The following predicates and functions are implemented:
+The following predicates and functions are implemented.
+The arguments must be @elemref["natural?"]{natural numbers},
+but this is not checked. 
               
 @elemtag{natural?}
-@defproc[#:kind "predicate" (natural? (obj #,(nbpr "sexpr?"))) boolean?]{
+@Defpred[(natural? (obj #,(nbpr "sexpr?"))) boolean?]{
 Same as @nbr[(listof '())].}
 
 @elemtag{zero?}
-@defproc[#:kind "predicate" (zero? (obj #,(nbpr "sexpr?"))) boolean?]{
+@Defpred[(zero? (obj #,(nbpr "sexpr?"))) boolean?]{
 Same as @nbr[(#,(nbpr "eq?") obj #,(nbpr "zero"))], but not raising an error if @nbr[obj] is not an
 @elemref["atom?"]{atom}.}
 
@@ -265,20 +269,20 @@ Error when @nbr[m] is @nbpr{zero}.}
 @elemtag{<}
 @defproc[#:kind "relation" (< (n #,(nbpr "natural?")) (m #,(nbpr "natural?"))) boolean?]
 
-@section{More functions and macros.}
+@section{More functions and syntactic forms.}
 
-In addition the interpreter implements the following predicate, macros and functions.
+In addition the interpreter implements the following predicate, forms and functions.
 
 @elemtag{boolean?}
-@defproc[#:kind "predicate" (boolean? (obj #,(nbpr "sexpr?"))) boolean?]{
+@Defpred[(boolean? (obj #,(nbpr "sexpr?"))) boolean?]{
 @nbr[#t] if the @nbr[obj] is a @nber["boolean?"]{boolean},
 else @nbr[#f]}
 
-@defform[#:kind "macro" (or q ...)]{
+@Defform[(or q ...)]{
 Same as in @(Rckt). If all but the last @nbr[q] are @nbr[#f],
 the last @nbr[q] is evaluated in tail position.}
 
-@defform[#:kind "macro" (and q ...)]{
+@Defform[(and q ...)]{
 Same as in @(Rckt). If none of the @nbr[q]s preceding the last one is @nbr[#f],
 the last @nbr[q] is evaluated in tail position.}
 
@@ -294,8 +298,8 @@ Returns @nbr[#t] if @nbr[b] is @nbr[#f], returns @nbr[#f] in all other cases.}
 
 @section[#:tag "internal-representation"]{Internal representation}
 
-Within the interpreter macros and functions,
-both closures made by macro @nbpr{lambda} and primitive ones,
+Within the interpreter syntactic forms and functions,
+both closures made by @nbpr{lambda} and primitive ones,
 are represented by @elemref["sexpr?"]{sexprs}. For example:
 
 @Interaction[
@@ -321,7 +325,7 @@ The bogus can be avoided by using uninterned symbols @tt{closure} and @tt{primit
 within the @nbr[source-code],
 but the restrictions do not provide the means for this.
 Another method within the restrictions would be to represent closures and primitives
-and even macros by functions.
+and even syntactic forms by functions.
 See package @nbhl["https://github.com/joskoot/The-Little-LISPer"]{The Little Lisper}.
 But even with this system bogus is not entirely excluded.
 See at the end of the documentation of package
@@ -355,7 +359,7 @@ A better definition is:
 (define value-of-source-code (value source-code))
 (time (sexpr? value-of-source-code))]
 
-The times are in milliseconds.@(lb)
+The times are in milliseconds.
 Using a hash it is possible to count the flattened length of @nbr[(value source-code)].
 @nb{We already} know that @tt{value-of-source-code} has no cycles and therefore have no need to
 check subexpressions not already being visited while counting.                         
