@@ -13,7 +13,7 @@
   (for-label "interpreter.rkt")
   (for-template "interpreter.rkt"))
 
-@(define-for-syntax local? #f)
+@(define-for-syntax local? #t)
 
 @(provide (all-defined-out))
 
@@ -53,7 +53,6 @@
 @(define-syntax-rule (do-not-ignore x ...) (begin x ...))
 @; Below syntaxes are used such as to allow keyword arguments
 @; without explicitly mentioning them in the definitions.
-@(define-syntax-rule (Defproc x ...) (defproc #:kind "function" x ...))
 @(define-syntax-rule (nbsl x ...) (nb (seclink    x ...)))
 @(define-syntax-rule (nbsr x ...) (nb (secref     x ...)))
 @(define-syntax-rule (nbhl x ...) (nb (hyperlink  x ...)))
@@ -76,8 +75,6 @@
 @(define-syntax-rule (nbrl x ...) (nb (racketlink x ...)))
 @(define-syntax-rule (nbr  x ...) (nb (racket     x ...)))
 @(define-syntax-rule (nbpr x) (nber x (tt x)))
-@(define-syntax-rule (defmacro x ...) (defform #:kind "macro" x ...))
-@(define-syntax-rule (defmacro* x ...) (defform* #:kind "macro" x ...))
 @(define (tt . content) (element 'tt (apply list content)))
 @(define(minus) (tt "-"))
 @(define (-?) (element "roman" ?-))
@@ -118,6 +115,10 @@
 @(define opt-proc "optional, default: ")
 
 @(define (Rckt) (nbhl "https://racket-lang.org/" "Racket"))
+
+@(define-syntax-rule (Defform x ...) (defform #:kind "syntactic form" x ...))
+@(define-syntax-rule (Defpred x ...) (defproc #:kind "predicate" x ...))
+@(define-syntax-rule (Defproc x ...) (defproc #:kind "function" x ...))
 
 @; With thanks to Dupéron Georges
 @(define (defform-remove-empty-lines the-defform)
