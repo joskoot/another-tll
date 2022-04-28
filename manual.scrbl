@@ -139,7 +139,7 @@ Rebinding @tt{lambda} does not confuse a @nbpr{let*}-form, for example:
 @Interaction[
 (value '(let* ((lambda add1)) (let* ((n (()()))) (lambda n))))]
 
-@note{In the expansion, a @nbpr{let*}-form uses an alternative identifier forform @nbpr{lambda}-forms.
+@note{In the expansion, a @nbpr{let*}-form uses an alternative identifier for @nbpr{lambda}-forms.
 It is very impropable that this identifier will occur in a @elemref["sexpr?"]{sexpr}
 given by the user to function @nbr[value].
 There are more sophisticated means to enhance hygiene,
