@@ -190,9 +190,9 @@ Like in @(Rckt), but restricted to lists. @nb{(Fourth law of @(tll))}}
 
 @elemtag{eq?}
 @Defproc[(eq? (obj-1 #,(nbpr "atom?")) (obj-2 #,(nbpr "atom?"))) boolean?]{
-Like in @(Rckt), but restricted to @elemref["atom?"]{atoms},
-for which @nbpr{eq?} returns the same as @(Rckt)'s @nbr[equal?].
-@nb{(Fifth law of @(tll))}}
+Like in @(Rckt), but restricted to @elemref["atom?"]{atoms}
+@nb{(Fifth law of @(tll))}@(lb)
+For @elemref["atom?"]{atoms} predicate @nbpr{eq?} returns the same as @(Rckt)'s @nbr[equal?].}
 
 @elemtag{show}
 @defproc[(show (info #,(nbpr "sexpr?")) (obj #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{
