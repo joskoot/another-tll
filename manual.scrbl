@@ -120,10 +120,11 @@ See section @seclink["internal-representation"]{Internal representation}.
 At least one @nbr[formal-argument] required and the @nbr[body] must consist of one
 @elemref["sexpr?"]{sexpr} only. @nb{No optional} or keyword arguments,
 neither a rest-argument.
+
 The interpreter (procedure @nbr[value])
 does not require that a lambda-form has at least one formal argument, for example:
-@Interaction[
-(value '((lambda () 'thunk)))]
+@inset{@Interaction[
+(value '((lambda () 'thunk)))]}
 The @nbr[source-code] does not contain thunks, though.}]
 
 @elemtag{let*}
