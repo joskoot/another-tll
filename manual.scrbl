@@ -39,7 +39,7 @@ Well, I do bother and therefore I'm giving it a shot in the form of two submodul
 Submodule @tt{restrictions} provides restricted versions of the following syntactic forms and
 functions:
 @nbpr{lambda}, @nbpr{let*}, @nbpr{quote}, @nbpr{cond}, @nbpr{atom?}, @nbpr{car}, @nbpr{cdr},
-@nbpr{cons}, @nbpr{eq?}, @nbpr{null?},  @nbpr{show} and @nbpr{wrong}.
+@nbpr{cons}, @nbpr{eq?}, @nbpr{null?},  @nbpr{gensym}, @nbpr{show} and @nbpr{wrong}.
 The @nbr[source-code] in submodule @tt{interpreter}
 is restricted to these syntactic forms and functions.
 Because the interpreter is intended to be meta-recursive,
@@ -63,6 +63,7 @@ It evaluates the received value in its own top environment.
 
 Nevertheless any argument yielding a @nber["sexpr?"]{sexpr} will do, for example:
 
+@inset{@Interaction[(value (list 'cons ''a ''(b c)))]}
 @inset{
 @Interaction[(value (read (open-input-string "(cons 'a '(b c))")))]}}
 
@@ -139,17 +140,13 @@ Because the interpreter is intended to be meta-recursive,
 it implements @nbpr{let*} too.
 The interpreter expands a @nbpr{let*}-form to a nest of @nbpr{lambda}-forms
 and evaluates the expanded form.
-The expansion is (almost) hygienic.
+The expansion is hygienic.
 Rebinding @tt{lambda} does not confuse a @nbpr{let*}-form, for example:
 
 @Interaction[
 (value '(let* ((lambda add1)) (let* ((n (()()))) (lambda n))))]
 
-@note{In the expansion, a @nbpr{let*}-form uses an alternative identifier for @nbpr{lambda}-forms.
-It is very impropable that this identifier will occur in a @elemref["sexpr?"]{sexpr}
-given by the user to function @nbr[value].
-There are more sophisticated means to enhance hygiene,
-but the @seclink["restrictions"]{restrictions} and style prevent their use.}}]
+@note{In the expansion, a @nbpr{let*}-form uses an uninterned identifier for @nbpr{lambda}-forms.}}]
 
 @elemtag{quote}
 @defform-remove-empty-lines[@Defform[(quote datum)
@@ -193,6 +190,9 @@ Like in @(Rckt), but restricted to lists. @nb{(Fourth law of @(tll))}}
 Like in @(Rckt), but restricted to @elemref["atom?"]{atoms}
 @nb{(Fifth law of @(tll))}@(lb)
 For @elemref["atom?"]{atoms} predicate @nbpr{eq?} returns the same as @(Rckt)'s @nbr[equal?].}
+
+@elemtag{gensym}
+@Defproc[(gensym (name symbol?)) (and/c symbol? immutable?)]
 
 @elemtag{show}
 @defproc[(show (info #,(nbpr "sexpr?")) (obj #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{
@@ -306,6 +306,15 @@ It is implemented with functions of fixed numbers of arguments only, though.}
 @elemtag{not}
 @Defproc[(not (b #,(nbpr "sexpr?"))) boolean?]{
 Returns @nbr[#t] if @nbr[b] is @nbr[#f], returns @nbr[#f] in all other cases.}
+
+@(ignore @elemtag{macro}
+@Defform[(macro (formal-argument ...) body)
+#:grammar
+((formal-argument id)
+ (body #,(nbpr "sexpr?")))]{
+Produces a macro. When the macro is called, it receives unevaluated arguments.
+The body of the macro is evaluated and
+the result is evaluated in the environment from which the macro was called.})
 
 @section[#:tag "internal-representation"]{Internal representation}
 
