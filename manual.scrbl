@@ -192,7 +192,8 @@ Like in @(Rckt), but restricted to @elemref["atom?"]{atoms}
 For @elemref["atom?"]{atoms} predicate @nbpr{eq?} returns the same as @(Rckt)'s @nbr[equal?].}
 
 @elemtag{gensym}
-@Defproc[(gensym (name symbol?)) (and/c symbol? (not/c (symbol-interned?)))]
+@Defproc[(gensym (name symbol?)) (and/c symbol? (not/c (symbol-interned?)))]{
+Used for hygienic expansion of @nbpr{let*}-forms in terms of @nbpr{lambda}.}
 
 @elemtag{show}
 @defproc[(show (info #,(nbpr "sexpr?")) (obj #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{
