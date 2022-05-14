@@ -6,10 +6,10 @@
 
 (module restrictions racket
 
- (provide lambda cond let* atom? car cdr cons eq? null? quote show wrong)
+ (provide lambda cond let* atom? car cdr cons eq? null? quote show wrong gensym)
  (provide #%module-begin #%app #%datum provide define-quote-and-evaluated)
 
- (require (only-in racket (lambda Lambda) (quote Quote) (cond Cond) (let* Let*)))
+ (require (only-in racket (lambda Lambda) (quote Quote) (cond Cond) (let* Let*) (gensym Gensym)))
  (require (only-in racket (null? Null?) (cons Cons) (car Car) (cdr Cdr) (eq? Eq?)))
  (require (only-in racket (boolean? Boolean?) (symbol? Symbol?)))
 
@@ -95,7 +95,9 @@
    ((Null? x) x)
    ((and (list? x) (andmap Null? x)) (length x))
    ((list? x) (map retro x))
-   (#t x))))
+   (#t x)))
+
+ (define (gensym name) (Gensym name)))
 
 ;;====================================================================================================
 
@@ -130,7 +132,7 @@
 
   ; Use a very impropable name for lambda-forms in the expansion of let*-forms.  
  
-    (*lambda-from-let* '|‘‹a·lambda·symbol used·for almost·hygiene in·macro·let*›’|)
+    (*lambda-from-let* (gensym '|‘‹a·lambda·symbol used·for·hygiene in·macro·let*›’|))
     
     (initial-table
      (lambda (name)
@@ -324,6 +326,7 @@
        ((eq? name (quote add1              )) (add1               (car vals)))
        ((eq? name (quote sub1              )) (sub1               (car vals)))
        ((eq? name (quote show              )) (show               (car vals) (cadr vals)))
+       ((eq? name (quote gensym            )) (gensym             (car vals)))
        ((eq? name (quote +                 )) (+                  (car vals) (cadr vals)))
        ((eq? name (quote *                 )) (*                  (car vals) (cadr vals)))
        ((eq? name (quote -                 )) (-                  (car vals) (cadr vals)))
@@ -451,72 +454,8 @@
 
    (lambda (e) (meaning e (quote ()))))))
 
-;;====================================================================================================
+;====================================================================================================
 
 (require 'interpreter)
 
-;;====================================================================================================
-
-;(define (sexpr? obj)
-; (define h (make-hash))
-; (define (sexpr? obj)
-;  (or (hash-ref h obj #f)
-;   (and (hash-set! h obj #t)
-;    (or (atom? obj) (and (pair? obj) (andmap sexpr? obj))))))
-; (sexpr? obj))
-;
-;(define (sexpr? obj)
-; (or
-;  (atom? obj)
-;  (and (list? obj) (andmap sexpr? obj))))
-;
-;(define (atom? obj)
-; (or
-;  (symbol? obj)
-;  (boolean? obj)
-;  (null? obj)))
-;
-;(sexpr? (value source-code))
-;
-;(time (value `(,source-code '(,source-code '((lambda (fun n) (fun (fun n))) add1 (()()()))))))
-;(value '(let* ((lambda add1)) (let* ((n (()()))) (lambda n))))
-
-
-;(define (trafo x)
-; (cond
-;  ((natural? x) (make-list x '()))
-;  ((list? x) (map trafo x))
-;  (else x)))
-;
-;(value
-; (trafo
-; '(let*
-;   ((self-apply (lambda (f) (f f)))
-;    (Y1 (lambda (g) (self-apply (lambda (f) (g (lambda (x  ) ((f f) x  )))))))
-;    (Y2 (lambda (g) (self-apply (lambda (f) (g (lambda (x y) ((f f) x y)))))))
-;    (cadr (lambda (x) (car (cdr x))))
-;    (build2 (lambda (x y) (cons x (cons y '()))))
-;    (even?+odd?
-;     (Y1
-;      (lambda (even?+odd?)
-;       (lambda (selector)
-;        (selector
-;         ((lambda (even? odd?)
-;           (build2
-;            (lambda (n) (cond ((zero? n) #t) (#t (odd? (sub1 n)))))
-;            (lambda (n) (cond ((zero? n) #f) (#t (even? (sub1 n)))))))
-;          (lambda (n) ((even?+odd? car) n))
-;          (lambda (n) ((even?+odd? cadr) n))))))))
-;    (even? (even?+odd? car))
-;    (odd? (even?+odd? cadr))
-;    (map
-;     (Y2
-;      (lambda (map)
-;       (lambda (proc lst)
-;        (cond
-;         ((null? lst) '())
-;         (#t (cons (proc (car lst)) (map proc (cdr lst))))))))))
-;   (list (map even? '(0 1 2 3 4)) (map odd? '(0 1 2 3 4))))))
-;
-;
-;
+;====================================================================================================
