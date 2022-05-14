@@ -105,7 +105,7 @@ uses a representation in terms of lists of @nbr[null].
 The @nbr[source-code] is written in a very small subset of @(Rckt).
 The syntactic forms and functions are
 @nbpr{lambda}, @nbpr{let*}, @nbpr{quote}, @nbpr{cond}, @nbpr{atom?}, @nbpr{car}, @nbpr{cdr},
-@nbpr{cons}, @nbpr{eq?} and @nbpr{null?}. They are restricted as described below.
+@nbpr{cons}, @nbpr{eq?}, @nbpr{null?} and @nbpr{gensym}. They are restricted as described below.
 Two procedures are added: @nbpr{show} and @nbpr{wrong}.
 The restrictions include those of the inside of the back cover of @(tll).
 They also restrict @nbpr{lambda}- and @nbpr{cond}-forms according to the style of @(tll).
@@ -192,7 +192,7 @@ Like in @(Rckt), but restricted to @elemref["atom?"]{atoms}
 For @elemref["atom?"]{atoms} predicate @nbpr{eq?} returns the same as @(Rckt)'s @nbr[equal?].}
 
 @elemtag{gensym}
-@Defproc[(gensym (name symbol?)) (and/c symbol? immutable?)]
+@Defproc[(gensym (name symbol?)) (and/c symbol? (not/c (symbol-interned?)))]
 
 @elemtag{show}
 @defproc[(show (info #,(nbpr "sexpr?")) (obj #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{
