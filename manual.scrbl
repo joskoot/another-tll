@@ -39,7 +39,7 @@ Well, I do bother and therefore I'm giving it a shot in the form of two submodul
 Submodule @tt{restrictions} provides restricted versions of the following syntactic forms and
 functions:
 @nbpr{lambda}, @nbpr{let*}, @nbpr{quote}, @nbpr{cond}, @nbpr{atom?}, @nbpr{car}, @nbpr{cdr},
-@nbpr{cons}, @nbpr{eq?}, @nbpr{null?},  @nbpr{gensym}, @nbpr{show} and @nbpr{wrong}.
+@nbpr{cons}, @nbpr{eq?}, @nbpr{null?}, @nbpr{show} and @nbpr{wrong}.
 The @nbr[source-code] in submodule @tt{interpreter}
 is restricted to these syntactic forms and functions.
 Because the interpreter is intended to be meta-recursive,
@@ -105,7 +105,7 @@ uses a representation in terms of lists of @nbr[null].
 The @nbr[source-code] is written in a very small subset of @(Rckt).
 The syntactic forms and functions are
 @nbpr{lambda}, @nbpr{let*}, @nbpr{quote}, @nbpr{cond}, @nbpr{atom?}, @nbpr{car}, @nbpr{cdr},
-@nbpr{cons}, @nbpr{eq?}, @nbpr{null?} and @nbpr{gensym}. They are restricted as described below.
+@nbpr{cons}, @nbpr{eq?} and @nbpr{null?}. They are restricted as described below.
 Two procedures are added: @nbpr{show} and @nbpr{wrong}.
 The restrictions include those of the inside of the back cover of @(tll).
 They also restrict @nbpr{lambda}- and @nbpr{cond}-forms according to the style of @(tll).
@@ -140,13 +140,22 @@ Because the interpreter is intended to be meta-recursive,
 it implements @nbpr{let*} too.
 The interpreter expands a @nbpr{let*}-form to a nest of @nbpr{lambda}-forms
 and evaluates the expanded form.
-The expansion is hygienic.
 Rebinding @tt{lambda} does not confuse a @nbpr{let*}-form, for example:
 
 @Interaction[
 (value '(let* ((lambda add1)) (let* ((n (()()))) (lambda n))))]
 
-@note{In the expansion, a @nbpr{let*}-form uses an uninterned identifier for @nbpr{lambda}-forms.}}]
+In the expansion, a @nbpr{let*}-form uses a distinct identifier for @nbpr{lambda}-forms.
+The identifier is chosen such that it is very improbable that it occurs in user code
+as long this user does not look into the @nbr[source-code].
+However, if or when the user looks into the @nbr[source-code] he or she finds the identifier:@(lb)
+@(hspace 3)@nbr[|‘‹a·lambda·symbol used·for·almost·hygiene in·macro·let*›’|]@(lb)
+and may fool the interpreter as follows:
+@Interaction[
+(value
+'((lambda (|‘‹a·lambda·symbol used·for·almost·hygiene in·macro·let*›’|)
+   (let* ((n (()()))) n))
+  (quote monkey)))]}]
 
 @elemtag{quote}
 @defform-remove-empty-lines[@Defform[(quote datum)
@@ -190,10 +199,6 @@ Like in @(Rckt), but restricted to lists. @nb{(Fourth law of @(tll))}}
 Like in @(Rckt), but restricted to @elemref["atom?"]{atoms}
 @nb{(Fifth law of @(tll))}@(lb)
 For @elemref["atom?"]{atoms} predicate @nbpr{eq?} returns the same as @(Rckt)'s @nbr[equal?].}
-
-@elemtag{gensym}
-@Defproc[(gensym (name symbol?)) (and/c symbol? (not/c (symbol-interned?)))]{
-Used for hygienic expansion of @nbpr{let*}-forms in terms of @nbpr{lambda}.}
 
 @elemtag{show}
 @defproc[(show (info #,(nbpr "sexpr?")) (obj #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{

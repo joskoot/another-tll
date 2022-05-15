@@ -6,10 +6,10 @@
 
 (module restrictions racket
 
- (provide lambda cond let* atom? car cdr cons eq? null? quote show wrong gensym)
+ (provide lambda cond let* atom? car cdr cons eq? null? quote show wrong)
  (provide #%module-begin #%app #%datum provide define-quote-and-evaluated)
 
- (require (only-in racket (lambda Lambda) (quote Quote) (cond Cond) (let* Let*) (gensym Gensym)))
+ (require (only-in racket (lambda Lambda) (quote Quote) (cond Cond) (let* Let*)))
  (require (only-in racket (null? Null?) (cons Cons) (car Car) (cdr Cdr) (eq? Eq?)))
  (require (only-in racket (boolean? Boolean?) (symbol? Symbol?)))
 
@@ -95,9 +95,7 @@
    ((Null? x) x)
    ((and (list? x) (andmap Null? x)) (length x))
    ((list? x) (map retro x))
-   (#t x)))
-
- (define (gensym name) (Gensym name)))
+   (#t x))))
 
 ;;====================================================================================================
 
@@ -132,7 +130,7 @@
 
   ; Use a very impropable name for lambda-forms in the expansion of let*-forms.  
  
-    (*lambda-from-let* (gensym '|‘‹a·lambda·symbol used·for·hygiene in·macro·let*›’|))
+    (*lambda-from-let* (quote |‘‹a·lambda·symbol used·for·almost·hygiene in·macro·let*›’|))
     
     (initial-table
      (lambda (name)
@@ -326,7 +324,6 @@
        ((eq? name (quote add1              )) (add1               (car vals)))
        ((eq? name (quote sub1              )) (sub1               (car vals)))
        ((eq? name (quote show              )) (show               (car vals) (cadr vals)))
-       ((eq? name (quote gensym            )) (gensym             (car vals)))
        ((eq? name (quote +                 )) (+                  (car vals) (cadr vals)))
        ((eq? name (quote *                 )) (*                  (car vals) (cadr vals)))
        ((eq? name (quote -                 )) (-                  (car vals) (cadr vals)))
