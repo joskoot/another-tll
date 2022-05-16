@@ -10,31 +10,41 @@
   scribble/eval
   scribble/racket
   (except-in racket natural?)
-  (for-label "interpreter.rkt"
-              (except-in racket set natural?) racket/block racket/function)
-  (for-template "interpreter.rkt" (except-in racket set natural?))
-  (for-syntax (except-in racket set natural?) racket/block))
+  (for-label "interpreter.rkt")
+  (for-template "interpreter.rkt"))
 
-@(define-for-syntax local #f)
+@; Define constant -local?-.
+@; Must be #t when running from local directory.
+@; Must be #f when installing package from GITHUB.
+@; Make sure the local directory-path does not contain both \Racket\ and \pkgs\.
+@(define-for-syntax local?
+  (not
+   (regexp-match
+    (regexp ".*[\\]Racket[\\].*[\\]pkgs[\\].*")
+    (path->string (current-directory)))))
+@;@(begin-for-syntax (displayln (if local? "local rendering" "package installation from GITHUB")))
+@;@(display (path->string (current-directory)))
 
 @(provide (all-defined-out))
 
 @(define-syntax-rule (Interaction x ...)
+
   (interaction #:eval
    (make-base-eval
     #:lang '(begin
-             (require racket "interpreter.rkt" racket/block
-                      (for-syntax racket racket/block))
+             (require racket "interpreter.rkt")
+             (print-reader-abbreviations #f)
              (print-as-expression #f))) x ...))
 
 @(define-syntax-rule (Interaction* x ...)
   (interaction #:eval evaller x ...))
 
 @(define (make-evaller)
+
   (make-base-eval
    #:lang '(begin
-            (require racket "interpreter.rkt" racket/block
-                     (for-syntax racket racket/block))
+            (require racket "interpreter.rkt" )
+            (print-reader-abbreviations #f)
             (print-as-expression #f))))
 
 @(define evaller (make-evaller))
@@ -55,7 +65,6 @@
 @(define-syntax-rule (do-not-ignore x ...) (begin x ...))
 @; Below syntaxes are used such as to allow keyword arguments
 @; without explicitly mentioning them in the definitions.
-@(define-syntax-rule (Defproc x ...) (defproc #:kind "function" x ...))
 @(define-syntax-rule (nbsl x ...) (nb (seclink    x ...)))
 @(define-syntax-rule (nbsr x ...) (nb (secref     x ...)))
 @(define-syntax-rule (nbhl x ...) (nb (hyperlink  x ...)))
@@ -63,23 +72,24 @@
 @(define-syntax (nbhll stx)
   (syntax-case stx ()
    ((_ x y ...)
-    (if local
+    (if local?
    #'(nb (hyperlink x y ...))
    #'(nb (hyperlink (string-append "../../" x) y ...))))))
 
 @(define-syntax (Defmodule stx)
-  (if local #'(defmodule "interpreter.rkt" #:packages ())
-            #'(defmodule tll/interpreter #:packages ())))
+  (if local? #'(defmodule "interpreter.rkt" #:packages ())
+             #'(defmodule another-tll/interpreter #:packages ())))
+
+@(define (tll)
+ @nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The Little LISPer})
 
 @(define-syntax-rule (nber x ...) (nb (elemref    x ...)))
 @(define-syntax-rule (nbrl x ...) (nb (racketlink x ...)))
 @(define-syntax-rule (nbr  x ...) (nb (racket     x ...)))
 @(define-syntax-rule (nbpr x) (nber x (tt x)))
-@(define-syntax-rule (defmacro x ...) (defform #:kind "macro" x ...))
-@(define-syntax-rule (defmacro* x ...) (defform* #:kind "macro" x ...))
 @(define (tt . content) (element 'tt (apply list content)))
 @(define(minus) (tt "-"))
-@(define(-?) (element "roman" ?-))
+@(define (-?) (element "roman" ?-))
 @(define (note . x) (inset (apply smaller x)))
 @(define (inset . x) (apply nested #:style 'inset x))
 @(define (expt-1) @↑{@(minus)1})
@@ -117,6 +127,10 @@
 @(define opt-proc "optional, default: ")
 
 @(define (Rckt) (nbhl "https://racket-lang.org/" "Racket"))
+
+@(define-syntax-rule (Defform x ...) (defform #:kind "syntactic form" x ...))
+@(define-syntax-rule (Defpred x ...) (defproc #:kind "predicate" x ...))
+@(define-syntax-rule (Defproc x ...) (defproc #:kind "function" x ...))
 
 @; With thanks to Dupéron Georges
 @(define (defform-remove-empty-lines the-defform)

@@ -203,7 +203,9 @@ For @elemref["atom?"]{atoms} predicate @nbpr{eq?} returns the same as @(Rckt)'s 
 @elemtag{show}
 @defproc[(show (info #,(nbpr "sexpr?")) (obj #,(nbpr "sexpr?"))) #,(nbpr "sexpr?")]{
 Prints the @nbr[info] and @nbr[obj] and returns the @nbr[obj].
-This procedure is added in order that the user can include some tracing in her/his program.}
+This procedure is added in order that the user can include some tracing in her/his program.
+@Interaction[
+(value '(show 'tracing lambda))]}
 
 @elemtag{wrong}
 @defproc[(wrong (why #,(nbpr "sexpr?")) (what #,(nbpr "sexpr?")))
@@ -213,7 +215,9 @@ but with @elemref["sexpr?"]{sexprs} as arguments.
 Used in the @nbr[source-code] for error messages,
 but error detection is very poor.
 Included for meta-recursion.
-Hence available for the user too.}
+Hence available for the user too.
+@Interaction[
+(value '(wrong 'monkey 'banana))]}
 
 @section[#:tag "Natural-numbers"]{Natural numbers}
 
