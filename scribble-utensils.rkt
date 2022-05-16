@@ -14,6 +14,7 @@
   (for-template "interpreter.rkt"))
 
 @(define-for-syntax local? #f)
+@(display (path->string (current-directory)))
 
 @(provide (all-defined-out))
 
