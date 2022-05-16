@@ -13,9 +13,16 @@
   (for-label "interpreter.rkt")
   (for-template "interpreter.rkt"))
 
-@(define-for-syntax local? #f)
-
-@(display (path->string (current-directory)))
+@; Define constant -local?-.
+@; Must be #t when running from local directory.
+@; Must be #f when installing package from GITHUB.
+@; Make sure the local directory-path does not contain both \Racket\ and \pkgs\.
+@(define-for-syntax local?
+  (not
+   (regexp-match
+    (regexp ".*[\\]Racket[\\].*[\\]pkgs[\\].*")
+    (path->string (current-directory)))))
+@(begin-for-syntax (displayln (if local? "local rendering" "package installation from GITHUB")))
 
 @(provide (all-defined-out))
 
