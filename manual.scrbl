@@ -22,7 +22,7 @@
 @(Defmodule)
 
 @section{Introduction}
-The penultimate question and answer in @(tll)
+The penultimate question and answer in The Little LISPer
 by Danial P. Friedman and Matthias Felleisen
 @nb{(1989, ISBN 0-574-24005-5)} read:
 
