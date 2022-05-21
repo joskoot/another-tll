@@ -80,9 +80,6 @@
   (if local? #'(defmodule "interpreter.rkt" #:packages ())
              #'(defmodule another-tll/interpreter #:packages ())))
 
-@(define (tll)
- @nbhl["https://7chan.org/pr/src/__The_Little_LISPer___3rd_Edition.pdf"]{The Little LISPer})
-
 @(define-syntax-rule (nber x ...) (nb (elemref    x ...)))
 @(define-syntax-rule (nbrl x ...) (nb (racketlink x ...)))
 @(define-syntax-rule (nbr  x ...) (nb (racket     x ...)))
