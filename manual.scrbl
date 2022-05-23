@@ -107,8 +107,8 @@ The syntactic forms and functions are
 @nbpr{lambda}, @nbpr{let*}, @nbpr{quote}, @nbpr{cond}, @nbpr{atom?}, @nbpr{car}, @nbpr{cdr},
 @nbpr{cons}, @nbpr{eq?} and @nbpr{null?}. They are restricted as described below.
 Two procedures are added: @nbpr{show} and @nbpr{wrong}.
-The restrictions include those of the inside of the back cover of @(tll).
-They also restrict @nbpr{lambda}- and @nbpr{cond}-forms according to the style of @(tll).
+The restrictions include those of the inside of the back cover of The Little LISPer.
+They also restrict @nbpr{lambda}- and @nbpr{cond}-forms according to the style of The Little LISPer.
 This style also implies that every object is represented by a @elemref["sexpr?"]{sexpr},
 functions and syntactic forms included.
 See section @seclink["internal-representation"]{Internal representation}.
@@ -179,25 +179,25 @@ a @nbrl[boolean?]{boolean} or the empty list, else returns @nbr[#f].}
 
 @elemtag{car}
 @Defproc[(car (lst (non-empty-listof sexpr?))) #,(nbpr "sexpr?")]{
-Like in @(Rckt), but restricted to proper lists. @nb{(First law of @(tll))}}
+Like in @(Rckt), but restricted to proper lists. @nb{(First law of The Little LISPer)}}
 
 @elemtag{cdr}
 @Defproc[(cdr (lst (non-empty-listof sexpr))) list?]{
-Like in @(Rckt), but restricted to proper lists. @nb{(Second law of @(tll))}}
+Like in @(Rckt), but restricted to proper lists. @nb{(Second law of The Little LISPer)}}
 
 @elemtag{cons}
 @Defproc[(cons (kar #,(nbpr "sexpr?")) (kdr (listof #,(nbpr "sexpr?")))) (listof #,(nbpr "sexpr?"))]{
 Like in @(Rckt), but @nbr[kdr] must be a proper list, which may be empty.
-@nb{(Third law of @(tll))}}
+@nb{(Third law of The Little LISPer)}}
 
 @elemtag{null?}
 @Defpred[(null? (obj (listof #,(nbpr "sexpr?")))) boolean?]{
-Like in @(Rckt), but restricted to lists. @nb{(Fourth law of @(tll))}}
+Like in @(Rckt), but restricted to lists. @nb{(Fourth law of The Little LISPer)}}
 
 @elemtag{eq?}
 @Defproc[(eq? (obj-1 #,(nbpr "atom?")) (obj-2 #,(nbpr "atom?"))) boolean?]{
 Like in @(Rckt), but restricted to @elemref["atom?"]{atoms}
-@nb{(Fifth law of @(tll))}@(lb)
+@nb{(Fifth law of The Little LISPer)}@(lb)
 For @elemref["atom?"]{atoms} predicate @nbpr{eq?} returns the same as @(Rckt)'s @nbr[equal?].}
 
 @elemtag{show}
