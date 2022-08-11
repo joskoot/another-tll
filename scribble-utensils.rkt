@@ -17,11 +17,7 @@
 @; Must be #t when running from local directory.
 @; Must be #f when installing package from GITHUB.
 @; Make sure the local directory-path does not contain both \Racket\ and \pkgs\.
-@(define-for-syntax local?
-  (not
-   (regexp-match
-    (regexp ".*[\\]Racket[\\].*[\\]pkgs[\\].*")
-    (path->string (current-directory)))))
+@(define-for-syntax local? #f)
 @;@(begin-for-syntax (displayln (if local? "local rendering" "package installation from GITHUB")))
 @;@(display (path->string (current-directory)))
 
